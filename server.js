@@ -48,7 +48,7 @@ let gameState = {
 };
 
 app.get('/', (req, res) => {
-  res.send(getHTMLContent());
+  res.send(getHTMLContent(req.headers.host));
 });
 
 io.on('connection', (socket) => {
@@ -66,7 +66,7 @@ io.on('connection', (socket) => {
     io.emit('update_players', gameState.players);
   });
 
-  // 2. بدء الجولة ودوران العجلة للاختيار العشوائي
+  // 2. بدء الجولة ودوران العجلة
   socket.on('start_round', () => {
     if (gameState.teamA.length === 0 || gameState.teamB.length === 0) {
       socket.emit('error_message', 'يجب انضمام طالب واحد على الأقل في كل فريق للبدء!');
@@ -94,7 +94,7 @@ io.on('connection', (socket) => {
     });
   });
 
-  // 3. استقبال إجابة الطالب المختار
+  // 3. استقبال الإجابات
   socket.on('submit_answer', (optionIndex) => {
     const isPlayerA = gameState.activePlayerA && gameState.activePlayerA.id === socket.id;
     const isPlayerB = gameState.activePlayerB && gameState.activePlayerB.id === socket.id;
@@ -136,7 +136,7 @@ server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-function getHTMLContent() {
+function getHTMLContent(host) {
   return `
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -148,22 +148,22 @@ function getHTMLContent() {
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     .slot-container {
-      height: 90px;
+      height: 110px;
       overflow: hidden;
       position: relative;
-      border-radius: 1rem;
+      border-radius: 1.5rem;
       background: #0f172a;
     }
     .slot-reel {
       transition: transform 0.1s linear;
     }
     .slot-item {
-      height: 90px;
+      height: 110px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.5rem;
-      font-weight: 800;
+      font-size: 2rem;
+      font-weight: 900;
     }
   </style>
 </head>
@@ -191,7 +191,7 @@ function getHTMLContent() {
       <div id="pTeamBadge" class="inline-block px-4 py-1.5 rounded-full text-sm font-bold"></div>
       <div class="p-6 bg-slate-700/40 rounded-2xl border border-slate-600 animate-pulse space-y-2">
         <div class="text-3xl">⏳</div>
-        <p class="text-slate-300 font-medium">الرجاء النظر للشاشة الرئيسية...</p>
+        <p class="text-slate-300 font-medium">الرجاء النظر لشاشة البروجيكتر...</p>
         <p class="text-xs text-slate-400">جاري اختيار الممثل عشوائياً!</p>
       </div>
     </div>
@@ -203,58 +203,77 @@ function getHTMLContent() {
     </div>
   </div>
 
-  <!-- واجهة الشاشة الرئيسية (البروجكتور) -->
-  <div id="displayView" class="w-full max-w-4xl bg-slate-800 p-8 rounded-3xl shadow-2xl border border-slate-700">
+  <!-- واجهة الشاشة الرئيسية المحدثة (البروجيكتر) -->
+  <div id="displayView" class="w-full max-w-5xl bg-slate-800 p-8 rounded-3xl shadow-2xl border border-slate-700">
+    
+    <!-- الهيدر المطور مع رمز QR للطلاب -->
     <div class="flex justify-between items-center mb-6 border-b border-slate-700 pb-4">
-      <div class="flex items-center gap-3">
-        <span class="text-4xl">💉</span>
+      <div class="flex items-center gap-4">
+        <span class="text-5xl">💉</span>
         <div>
-          <h1 class="text-2xl font-black text-blue-400">تحدي قواعد التمريض واللغة الإنجليزية</h1>
-          <p class="text-xs text-slate-400">قواعد الضمائر الموصولة: Who / Which / That</p>
+          <h1 class="text-3xl font-black text-blue-400">تحدي التمريض والقواعد اللغوية</h1>
+          <p class="text-sm text-slate-400 mt-1">Relative Pronouns: Who | Which | That</p>
         </div>
       </div>
-      <button onclick="switchRole()" class="text-xs bg-slate-700 hover:bg-slate-600 px-3 py-2 rounded-xl border border-slate-600">
-        🔄 تبديل الواجهة (هاتف / شاشة)
-      </button>
+      
+      <!-- كود QR تلقائي للانضمام -->
+      <div class="flex items-center gap-3 bg-slate-900 p-3 rounded-2xl border border-slate-700">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=90x90&data=https://${host}" alt="QR Code" class="w-20 h-20 rounded-lg">
+        <div class="text-right">
+          <p class="text-xs font-bold text-emerald-400">📱 امسح الرمز للدخول:</p>
+          <p class="text-[10px] text-slate-400 mt-1 break-all max-w-[140px]">${host}</p>
+        </div>
+      </div>
     </div>
 
-    <div class="grid grid-cols-2 gap-6 mb-6">
-      <div class="bg-red-950/30 border-2 border-red-500/40 p-5 rounded-2xl">
-        <div class="flex justify-between items-center mb-3">
-          <h3 class="text-xl font-black text-red-400">🔴 الفريق الأحمر</h3>
-          <span id="scoreA" class="text-3xl font-black text-red-400">0 نقطة</span>
+    <!-- بطاقات الفرق وعجلة الاختيار -->
+    <div class="grid grid-cols-2 gap-8 mb-6">
+      
+      <!-- الفريق الأحمر -->
+      <div class="bg-red-950/40 border-2 border-red-500/50 p-6 rounded-3xl">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-2xl font-black text-red-400">🔴 الفريق الأحمر</h3>
+          <span id="scoreA" class="text-4xl font-black text-red-400 bg-red-950/80 px-4 py-1 rounded-xl border border-red-800">0 نقطة</span>
         </div>
-        <div class="slot-container border border-red-500/50 mb-3">
+        <div class="slot-container border-2 border-red-500/60 mb-4 shadow-inner">
           <div id="reelA" class="slot-reel">
             <div class="slot-item text-red-400">في انتظار الانضمام... 🎲</div>
           </div>
         </div>
-        <div id="playersA" class="text-xs text-slate-300 flex flex-wrap gap-1"></div>
+        <div class="text-xs font-bold text-slate-400 mb-1">أعضاء الفريق:</div>
+        <div id="playersA" class="text-xs text-slate-300 flex flex-wrap gap-1.5"></div>
       </div>
 
-      <div class="bg-blue-950/30 border-2 border-blue-500/40 p-5 rounded-2xl">
-        <div class="flex justify-between items-center mb-3">
-          <h3 class="text-xl font-black text-blue-400">🔵 الفريق الأزرق</h3>
-          <span id="scoreB" class="text-3xl font-black text-blue-400">0 نقطة</span>
+      <!-- الفريق الأزرق -->
+      <div class="bg-blue-950/40 border-2 border-blue-500/50 p-6 rounded-3xl">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-2xl font-black text-blue-400">🔵 الفريق الأزرق</h3>
+          <span id="scoreB" class="text-4xl font-black text-blue-400 bg-blue-950/80 px-4 py-1 rounded-xl border border-blue-800">0 نقطة</span>
         </div>
-        <div class="slot-container border border-blue-500/50 mb-3">
+        <div class="slot-container border-2 border-blue-500/60 mb-4 shadow-inner">
           <div id="reelB" class="slot-reel">
             <div class="slot-item text-blue-400">في انتظار الانضمام... 🎲</div>
           </div>
         </div>
-        <div id="playersB" class="text-xs text-slate-300 flex flex-wrap gap-1"></div>
+        <div class="text-xs font-bold text-slate-400 mb-1">أعضاء الفريق:</div>
+        <div id="playersB" class="text-xs text-slate-300 flex flex-wrap gap-1.5"></div>
       </div>
     </div>
 
-    <div class="bg-slate-900 p-6 rounded-2xl border border-slate-700 text-center mb-6">
-      <h2 id="projQuestion" class="text-2xl font-bold text-amber-300">
-        انضموا للعبة عبر الرابط، ثم اضغطوا "بدء الجولة"! 🎲
+    <!-- صندوق عرض السؤال الكبير -->
+    <div class="bg-slate-900 p-8 rounded-3xl border border-slate-700 text-center mb-6 shadow-xl">
+      <h2 id="projQuestion" class="text-3xl font-black text-amber-300 leading-relaxed">
+        امسحوا رمز QR بالهاتف للدخول، ثم اضغطوا "بدء الجولة"! 🎲
       </h2>
     </div>
 
-    <div class="flex justify-center">
-      <button onclick="startRound()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-10 py-4 rounded-2xl font-black text-xl shadow-lg transition active:scale-95">
-        🎰 بدء الجولة واختيار الأسماء عشوائياً
+    <!-- زر التحكم باللعبة -->
+    <div class="flex justify-between items-center">
+      <button onclick="switchRole()" class="text-xs bg-slate-700 hover:bg-slate-600 px-4 py-2.5 rounded-xl border border-slate-600 font-bold">
+        🔄 تحويل إلى واجهة هاتف
+      </button>
+      <button onclick="startRound()" class="bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white px-12 py-4 rounded-2xl font-black text-2xl shadow-xl transition">
+        🎰 بدء الجولة ودوران العجلة
       </button>
     </div>
   </div>
@@ -294,11 +313,11 @@ function getHTMLContent() {
       const teamB = players.filter(p => p.team === 'B');
 
       document.getElementById('playersA').innerHTML = teamA.map(p => 
-        \`<span class="bg-red-900/40 border border-red-700/50 px-2 py-1 rounded-lg">\${p.name}</span>\`
+        \`<span class="bg-red-900/40 border border-red-700/50 px-2.5 py-1 rounded-lg font-bold">\${p.name}</span>\`
       ).join('');
 
       document.getElementById('playersB').innerHTML = teamB.map(p => 
-        \`<span class="bg-blue-900/40 border border-blue-700/50 px-2 py-1 rounded-lg">\${p.name}</span>\`
+        \`<span class="bg-blue-900/40 border border-blue-700/50 px-2.5 py-1 rounded-lg font-bold">\${p.name}</span>\`
       ).join('');
     });
 
@@ -307,7 +326,7 @@ function getHTMLContent() {
     }
 
     socket.on('round_started', (data) => {
-      document.getElementById('projQuestion').innerText = \`سؤال (\${data.questionNum}): \${data.question}\`;
+      document.getElementById('projQuestion').innerText = \`السؤال (\${data.questionNum}): \${data.question}\`;
 
       runSlotMachine('reelA', data.teamAPlayers, data.activeA.name, 'text-red-400');
       runSlotMachine('reelB', data.teamBPlayers, data.activeB.name, 'text-blue-400');
@@ -324,7 +343,7 @@ function getHTMLContent() {
 
       if (isMyTurn) {
         turnBadge.className = "p-4 rounded-2xl font-bold text-base bg-emerald-500/20 text-emerald-300 border border-emerald-500 animate-bounce";
-        turnBadge.innerText = "🔥 وقع الاختيار عليك! المسئولية عليك الآن لحماية فريقك!";
+        turnBadge.innerText = "🔥 وقع الاختيار عليك! اختر الإجابة الصحيحة لفريقك!";
         document.getElementById('questionBox').innerText = data.question;
 
         data.options.forEach((opt, idx) => {
@@ -333,7 +352,7 @@ function getHTMLContent() {
           btn.innerText = opt;
           btn.onclick = () => {
             socket.emit('submit_answer', idx);
-            optionsContainer.innerHTML = '<div class="p-4 bg-emerald-500/20 text-emerald-300 border border-emerald-500 rounded-2xl font-bold">✅ تم إرسال إجابتك!</div>';
+            optionsContainer.innerHTML = '<div class="p-4 bg-emerald-500/20 text-emerald-300 border border-emerald-500 rounded-2xl font-bold">✅ تم إرسال الإجابة!</div>';
           };
           optionsContainer.appendChild(btn);
         });
@@ -361,7 +380,7 @@ function getHTMLContent() {
 
       function spin() {
         currentIndex++;
-        reel.style.transform = \`translateY(-\${currentIndex * 90}px)\`;
+        reel.style.transform = \`translateY(-\${currentIndex * 110}px)\`;
 
         if (currentIndex < repeatedNames.length - 1) {
           if (currentIndex > repeatedNames.length - 6) speed += 50;
