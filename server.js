@@ -6,7 +6,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
 
-// بنك الأسئلة (قواعد Who / Which / That في سياق التمريض)
+// بنك الأسئلة (المؤقت لحين إرسال أسئلتك الجديدة)
 const questions = [
   {
     text: "The nurse _____ was assigned to the ICU checked the vital signs.",
@@ -35,7 +35,6 @@ const questions = [
   }
 ];
 
-// حالة اللعبة الحالية
 let gameState = {
   players: [],
   teamA: [],
@@ -47,7 +46,7 @@ let gameState = {
   answers: { A: null, B: null }
 };
 
-// 1. رابط الطالب المباشر (عند مسح الـ QR أو فتح الرابط الرئيسي) -> شاشة إدخال الاسم فقط
+// 1. رابط الطالب المباشر (عند مسح الـ QR أو فتح الرابط الرئيسي) -> شاشة إدخال الاسم
 app.get('/', (req, res) => {
   res.send(getStudentHTML());
 });
@@ -59,7 +58,6 @@ app.get('/projector', (req, res) => {
 
 io.on('connection', (socket) => {
 
-  // تسجيل انضمام طالب جديد
   socket.on('join_game', (playerName) => {
     const team = gameState.teamA.length <= gameState.teamB.length ? 'A' : 'B';
     const newPlayer = { id: socket.id, name: playerName, team };
@@ -72,7 +70,6 @@ io.on('connection', (socket) => {
     io.emit('update_players', gameState.players);
   });
 
-  // بدء الجولة ودوران العجلة
   socket.on('start_round', () => {
     if (gameState.teamA.length === 0 || gameState.teamB.length === 0) {
       socket.emit('error_message', 'يجب انضمام طالب واحد على الأقل في كل فريق للبدء!');
@@ -100,7 +97,6 @@ io.on('connection', (socket) => {
     });
   });
 
-  // استقبال الإجابات
   socket.on('submit_answer', (optionIndex) => {
     const isPlayerA = gameState.activePlayerA && gameState.activePlayerA.id === socket.id;
     const isPlayerB = gameState.activePlayerB && gameState.activePlayerB.id === socket.id;
@@ -142,7 +138,7 @@ server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-// ==================== واجهة الطالب (تفتح تلقائياً عند مسح الـ QR) ====================
+// ==================== واجهة الطالب (تفتح للطلاب تلقائياً) ====================
 function getStudentHTML() {
   return `
 <!DOCTYPE html>
@@ -150,41 +146,56 @@ function getStudentHTML() {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>انضمام الطالب - لعبة التمريض</title>
+  <title>انضمام الطالب - تحدي التمريض</title>
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes pulse-heart {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+    }
+    .heart-anim { animation: pulse-heart 1.2s infinite ease-in-out; }
+  </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen p-4 font-sans flex flex-col items-center justify-center">
+<body class="bg-slate-950 text-slate-100 min-h-screen p-4 font-sans flex flex-col items-center justify-center relative overflow-hidden">
 
-  <div id="playerView" class="w-full max-w-md bg-slate-800 p-6 rounded-3xl shadow-2xl border border-slate-700">
+  <!-- خلفية زينة طبية -->
+  <div class="absolute -top-10 -left-10 text-9xl opacity-5 select-none pointer-events-none">🩺</div>
+  <div class="absolute -bottom-10 -right-10 text-9xl opacity-5 select-none pointer-events-none">💊</div>
+
+  <div id="playerView" class="w-full max-w-md bg-slate-900/90 backdrop-blur-md p-6 rounded-3xl shadow-2xl border border-cyan-500/30 relative z-10">
     <div id="loginForm" class="space-y-4">
       <div class="text-center">
-        <span class="text-5xl">🩺</span>
-        <h2 class="text-2xl font-bold mt-2 text-blue-400">انضمام لسباق التمريض</h2>
-        <p class="text-xs text-slate-400 mt-1">تحدي قواعد Who, Which, That</p>
+        <div class="inline-block p-4 bg-cyan-950/60 rounded-full border border-cyan-500/40 shadow-inner mb-2">
+          <span class="text-5xl heart-anim inline-block">🩺</span>
+        </div>
+        <h2 class="text-2xl font-black text-cyan-400">سباق التمريض اللغوي</h2>
+        <p class="text-xs text-slate-400 mt-1 flex items-center justify-center gap-1">
+          <span>🏥</span> Nursing English Challenge <span>💉</span>
+        </p>
       </div>
       <div>
-        <label class="block text-sm font-medium text-slate-300 mb-1">اسم الطالب / الطالبة:</label>
-        <input id="nameInput" type="text" placeholder="أدخل اسمك هنا..." class="w-full p-3.5 rounded-xl bg-slate-700 text-white border border-slate-600 focus:outline-none focus:border-blue-500 text-center font-bold text-lg">
+        <label class="block text-sm font-bold text-cyan-200 mb-1">اسم الطالب / الطالبة:</label>
+        <input id="nameInput" type="text" placeholder="أدخل اسمك هنا..." class="w-full p-3.5 rounded-xl bg-slate-800 text-white border border-slate-700 focus:outline-none focus:border-cyan-400 text-center font-bold text-lg shadow-inner">
       </div>
-      <button onclick="joinGame()" class="w-full bg-blue-600 hover:bg-blue-500 active:scale-95 py-3.5 rounded-xl font-bold text-lg shadow-lg transition">
-        🚀 دخول اللعبة
+      <button onclick="joinGame()" class="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 active:scale-95 py-3.5 rounded-xl font-black text-lg shadow-lg shadow-cyan-950 transition flex items-center justify-center gap-2">
+        <span>🚀</span> انضمام للفريق
       </button>
     </div>
 
     <div id="waitScreen" class="hidden text-center py-6 space-y-4">
-      <div class="text-2xl font-bold">مرحباً <span id="pName" class="text-blue-400"></span></div>
-      <div id="pTeamBadge" class="inline-block px-4 py-1.5 rounded-full text-sm font-bold"></div>
-      <div class="p-6 bg-slate-700/40 rounded-2xl border border-slate-600 animate-pulse space-y-2">
-        <div class="text-3xl">⏳</div>
-        <p class="text-slate-300 font-medium">الرجاء النظر لشاشة البروجيكتر...</p>
-        <p class="text-xs text-slate-400">جاري اختيار الممثل عشوائياً!</p>
+      <div class="text-2xl font-bold">مرحباً <span id="pName" class="text-cyan-400"></span> 🩺</div>
+      <div id="pTeamBadge" class="inline-block px-5 py-2 rounded-full text-sm font-bold shadow-md"></div>
+      <div class="p-6 bg-slate-800/80 rounded-2xl border border-cyan-500/30 animate-pulse space-y-2">
+        <div class="text-4xl">💓</div>
+        <p class="text-slate-200 font-bold">يرجى النظر لشاشة البروجيكتر...</p>
+        <p class="text-xs text-cyan-300">جاري اختيار الممثل عشوائياً لدخول الجولة!</p>
       </div>
     </div>
 
     <div id="gamePlayArea" class="hidden text-center space-y-4">
       <div id="turnBadge" class="p-4 rounded-2xl font-bold text-base shadow-md"></div>
-      <div id="questionBox" class="bg-slate-700/70 p-5 rounded-2xl border border-slate-600 font-bold text-lg text-amber-300"></div>
+      <div id="questionBox" class="bg-slate-800/90 p-5 rounded-2xl border border-amber-500/40 font-bold text-lg text-amber-300 shadow-inner"></div>
       <div id="optionsContainer" class="space-y-3"></div>
     </div>
   </div>
@@ -204,11 +215,11 @@ function getStudentHTML() {
       document.getElementById('pName').innerText = data.name;
       const badge = document.getElementById('pTeamBadge');
       if (data.team === 'A') {
-        badge.className = "inline-block px-4 py-1.5 rounded-full text-sm font-bold bg-red-500/20 text-red-400 border border-red-500";
-        badge.innerText = "🔴 الفريق الأحمر";
+        badge.className = "inline-block px-5 py-2 rounded-full text-sm font-bold bg-red-950/80 text-red-400 border border-red-500 shadow-red-950/50";
+        badge.innerText = "🔴 الفريق الأحمر (Rescue Team)";
       } else {
-        badge.className = "inline-block px-4 py-1.5 rounded-full text-sm font-bold bg-blue-500/20 text-blue-400 border border-blue-500";
-        badge.innerText = "🔵 الفريق الأزرق";
+        badge.className = "inline-block px-5 py-2 rounded-full text-sm font-bold bg-blue-950/80 text-blue-400 border border-blue-500 shadow-blue-950/50";
+        badge.innerText = "🔵 الفريق الأزرق (ICU Team)";
       }
     });
 
@@ -224,24 +235,24 @@ function getStudentHTML() {
       optionsContainer.innerHTML = '';
 
       if (isMyTurn) {
-        turnBadge.className = "p-4 rounded-2xl font-bold text-base bg-emerald-500/20 text-emerald-300 border border-emerald-500 animate-bounce";
-        turnBadge.innerText = "🔥 وقع الاختيار عليك! اختر الإجابة الصحيحة لفريقك!";
+        turnBadge.className = "p-4 rounded-2xl font-bold text-base bg-emerald-950/80 text-emerald-300 border border-emerald-500 animate-bounce";
+        turnBadge.innerText = "⚡ وقع الاختيار عليك! اختر الإجابة الصحيحة لفريقك!";
         document.getElementById('questionBox').innerText = data.question;
 
         data.options.forEach((opt, idx) => {
           const btn = document.createElement('button');
-          btn.className = "w-full bg-blue-600 hover:bg-blue-500 active:scale-95 text-white p-4 rounded-2xl font-black text-lg transition shadow-md";
-          btn.innerText = opt;
+          btn.className = "w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 active:scale-95 text-white p-4 rounded-2xl font-black text-lg transition shadow-md flex items-center justify-between px-6";
+          btn.innerHTML = \`<span>\${opt}</span> <span>💉</span>\`;
           btn.onclick = () => {
             socket.emit('submit_answer', idx);
-            optionsContainer.innerHTML = '<div class="p-4 bg-emerald-500/20 text-emerald-300 border border-emerald-500 rounded-2xl font-bold">✅ تم إرسال الإجابة!</div>';
+            optionsContainer.innerHTML = '<div class="p-4 bg-emerald-950/80 text-emerald-300 border border-emerald-500 rounded-2xl font-bold">✅ تم تسجيل إجابتك بنجاح!</div>';
           };
           optionsContainer.appendChild(btn);
         });
       } else {
-        turnBadge.className = "p-4 rounded-2xl font-bold text-sm bg-slate-700/60 text-slate-300 border border-slate-600";
-        turnBadge.innerText = \`🎯 الممثلون المختارون:\\n🔴 الفريق الأحمر: \${data.activeA.name}\\n🔵 الفريق الأزرق: \${data.activeB.name}\`;
-        optionsContainer.innerHTML = '<div class="p-4 bg-slate-800 text-slate-400 rounded-2xl animate-pulse">⏳ شجع ممثل فريقك الآن!</div>';
+        turnBadge.className = "p-4 rounded-2xl font-bold text-sm bg-slate-800/80 text-slate-300 border border-slate-700";
+        turnBadge.innerText = \`🎯 الممثلون المختارون للجولة:\\n🔴 \${data.activeA.name}\\n🔵 \${data.activeB.name}\`;
+        optionsContainer.innerHTML = '<div class="p-4 bg-slate-900 text-slate-400 rounded-2xl animate-pulse">⏳ تابع شاشة البروجيكتر لمشاهدة التنافس!</div>';
       }
     });
 
@@ -252,7 +263,7 @@ function getStudentHTML() {
   `;
 }
 
-// ==================== واجهة البروجيكتر (تفتح عبر /projector فقط) ====================
+// ==================== واجهة البروجيكتر (الخاصة بالأستاذ والعرض) ====================
 function getProjectorHTML(host) {
   return `
 <!DOCTYPE html>
@@ -260,7 +271,7 @@ function getProjectorHTML(host) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>شاشة العرض - لعبة التمريض</title>
+  <title>شاشة البروجيكتر - تحدي التمريض</title>
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -269,7 +280,7 @@ function getProjectorHTML(host) {
       overflow: hidden;
       position: relative;
       border-radius: 1.5rem;
-      background: #0f172a;
+      background: #020617;
     }
     .slot-reel {
       transition: transform 0.1s linear;
@@ -282,72 +293,110 @@ function getProjectorHTML(host) {
       font-size: 2rem;
       font-weight: 900;
     }
+    @keyframes ecg-line {
+      0% { background-position: 0% 0%; }
+      100% { background-position: 200% 0%; }
+    }
+    .ecg-header {
+      background: linear-gradient(90deg, #020617, #0f172a, #020617);
+      border-bottom: 2px solid #06b6d4;
+    }
   </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen p-4 font-sans flex flex-col items-center justify-center">
+<body class="bg-slate-950 text-slate-100 min-h-screen p-6 font-sans flex flex-col items-center justify-center relative">
 
-  <div id="displayView" class="w-full max-w-5xl bg-slate-800 p-8 rounded-3xl shadow-2xl border border-slate-700">
+  <div id="displayView" class="w-full max-w-6xl bg-slate-900/90 backdrop-blur-md p-8 rounded-3xl shadow-2xl border border-cyan-500/30 relative">
     
-    <div class="flex justify-between items-center mb-6 border-b border-slate-700 pb-4">
+    <!-- رأس الشاشة بتصميم طبي مدروس -->
+    <div class="flex justify-between items-center mb-6 pb-4 ecg-header rounded-2xl p-4 border border-cyan-500/20">
       <div class="flex items-center gap-4">
-        <span class="text-5xl">💉</span>
+        <div class="p-3 bg-cyan-950 rounded-2xl border border-cyan-500/40 text-4xl shadow-inner">
+          🩺
+        </div>
         <div>
-          <h1 class="text-3xl font-black text-blue-400">تحدي التمريض والقواعد اللغوية</h1>
-          <p class="text-sm text-slate-400 mt-1">Relative Pronouns: Who | Which | That</p>
+          <h1 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400">
+            تحدي التمريض والقواعد اللغوية
+          </h1>
+          <p class="text-xs text-slate-400 mt-1 flex items-center gap-2">
+            <span>🏥 Nursing Department</span> • <span>Relative Pronouns: Who | Which | That</span>
+          </p>
         </div>
       </div>
       
-      <!-- كود الـ QR الموجه مباشرة إلى الرابط الرئيسي الخاص بإدخال الاسم -->
-      <div class="flex items-center gap-3 bg-slate-900 p-3 rounded-2xl border border-slate-700">
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=https://${host}/" alt="QR Code" class="w-24 h-24 rounded-lg">
+      <!-- رمز الـ QR للدخول المباشر -->
+      <div class="flex items-center gap-3 bg-slate-950 p-3 rounded-2xl border border-cyan-500/40 shadow-lg">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=https://${host}/" alt="QR Code" class="w-20 h-20 rounded-lg border border-slate-700">
         <div class="text-right">
-          <p class="text-xs font-bold text-emerald-400">📱 امسح الرمز للدخول:</p>
-          <p class="text-[10px] text-slate-400 mt-1 break-all max-w-[140px]">${host}</p>
+          <p class="text-xs font-black text-emerald-400 flex items-center gap-1">📱 امسح للبدء 💉</p>
+          <p class="text-[10px] text-slate-400 mt-1 break-all max-w-[130px] font-mono">${host}</p>
         </div>
       </div>
     </div>
 
+    <!-- الفرق وعجلة الأسماء -->
     <div class="grid grid-cols-2 gap-8 mb-6">
+      
       <!-- الفريق الأحمر -->
-      <div class="bg-red-950/40 border-2 border-red-500/50 p-6 rounded-3xl">
+      <div class="bg-red-950/30 border-2 border-red-500/40 p-6 rounded-3xl relative overflow-hidden shadow-xl">
         <div class="flex justify-between items-center mb-4">
-          <h3 class="text-2xl font-black text-red-400">🔴 الفريق الأحمر</h3>
-          <span id="scoreA" class="text-4xl font-black text-red-400 bg-red-950/80 px-4 py-1 rounded-xl border border-red-800">0 نقطة</span>
+          <h3 class="text-2xl font-black text-red-400 flex items-center gap-2">
+            <span>🔴</span> Rescue Team
+          </h3>
+          <span id="scoreA" class="text-3xl font-black text-red-400 bg-red-950/80 px-4 py-1.5 rounded-xl border border-red-800/80 shadow-inner">
+            0 نقطة 🩸
+          </span>
         </div>
         <div class="slot-container border-2 border-red-500/60 mb-4 shadow-inner">
           <div id="reelA" class="slot-reel">
-            <div class="slot-item text-red-400">في انتظار الانضمام... 🎲</div>
+            <div class="slot-item text-red-400">في انتظار الأبطال... 🩺</div>
           </div>
         </div>
-        <div class="text-xs font-bold text-slate-400 mb-1">أعضاء الفريق:</div>
-        <div id="playersA" class="text-xs text-slate-300 flex flex-wrap gap-1.5"></div>
+        <div class="text-xs font-bold text-slate-400 mb-1 flex items-center gap-1">
+          <span>👨‍⚕️</span> كادر الفريق:
+        </div>
+        <div id="playersA" class="text-xs text-slate-300 flex flex-wrap gap-1.5 min-h-[30px]"></div>
       </div>
 
       <!-- الفريق الأزرق -->
-      <div class="bg-blue-950/40 border-2 border-blue-500/50 p-6 rounded-3xl">
+      <div class="bg-blue-950/30 border-2 border-blue-500/40 p-6 rounded-3xl relative overflow-hidden shadow-xl">
         <div class="flex justify-between items-center mb-4">
-          <h3 class="text-2xl font-black text-blue-400">🔵 الفريق الأزرق</h3>
-          <span id="scoreB" class="text-4xl font-black text-blue-400 bg-blue-950/80 px-4 py-1 rounded-xl border border-blue-800">0 نقطة</span>
+          <h3 class="text-2xl font-black text-blue-400 flex items-center gap-2">
+            <span>🔵</span> ICU Team
+          </h3>
+          <span id="scoreB" class="text-3xl font-black text-blue-400 bg-blue-950/80 px-4 py-1.5 rounded-xl border border-blue-800/80 shadow-inner">
+            0 نقطة 💊
+          </span>
         </div>
         <div class="slot-container border-2 border-blue-500/60 mb-4 shadow-inner">
           <div id="reelB" class="slot-reel">
-            <div class="slot-item text-blue-400">في انتظار الانضمام... 🎲</div>
+            <div class="slot-item text-blue-400">في انتظار الأبطال... 🩺</div>
           </div>
         </div>
-        <div class="text-xs font-bold text-slate-400 mb-1">أعضاء الفريق:</div>
-        <div id="playersB" class="text-xs text-slate-300 flex flex-wrap gap-1.5"></div>
+        <div class="text-xs font-bold text-slate-400 mb-1 flex items-center gap-1">
+          <span>👩‍⚕️</span> كادر الفريق:
+        </div>
+        <div id="playersB" class="text-xs text-slate-300 flex flex-wrap gap-1.5 min-h-[30px]"></div>
       </div>
     </div>
 
-    <div class="bg-slate-900 p-8 rounded-3xl border border-slate-700 text-center mb-6 shadow-xl">
-      <h2 id="projQuestion" class="text-3xl font-black text-amber-300 leading-relaxed">
-        امسحوا رمز QR بالهاتف للدخول، ثم اضغطوا "بدء الجولة"! 🎲
+    <!-- صندوق السؤال -->
+    <div class="bg-slate-950/90 p-8 rounded-3xl border border-amber-500/40 text-center mb-6 shadow-2xl relative">
+      <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-500 text-slate-950 px-4 py-0.5 rounded-full text-xs font-black">
+        شاشة الحالة الطبية والأسئلة 💓
+      </div>
+      <h2 id="projQuestion" class="text-3xl font-black text-amber-300 leading-relaxed mt-2">
+        امسحوا رمز QR بالهاتف للدخول، ثم اضغطوا "بدء الجولة"! 🎰
       </h2>
     </div>
 
-    <div class="flex justify-end items-center">
-      <button onclick="startRound()" class="bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white px-12 py-4 rounded-2xl font-black text-2xl shadow-xl transition">
-        🎰 بدء الجولة ودوران العجلة
+    <!-- تحكم الأستاذ -->
+    <div class="flex justify-between items-center">
+      <div class="text-xs text-slate-400 flex items-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+        <span>السيرفر متصل وجاهز للمحاضرة</span>
+      </div>
+      <button onclick="startRound()" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 active:scale-95 text-white px-12 py-4 rounded-2xl font-black text-2xl shadow-xl shadow-emerald-950/50 transition flex items-center gap-3">
+        <span>🎰</span> بدء الجولة ودوران العجلة
       </button>
     </div>
   </div>
@@ -360,11 +409,11 @@ function getProjectorHTML(host) {
       const teamB = players.filter(p => p.team === 'B');
 
       document.getElementById('playersA').innerHTML = teamA.map(p => 
-        \`<span class="bg-red-900/40 border border-red-700/50 px-2.5 py-1 rounded-lg font-bold">\${p.name}</span>\`
+        \`<span class="bg-red-950/80 border border-red-700/60 text-red-200 px-2.5 py-1 rounded-lg font-bold">🩺 \${p.name}</span>\`
       ).join('');
 
       document.getElementById('playersB').innerHTML = teamB.map(p => 
-        \`<span class="bg-blue-900/40 border border-blue-700/50 px-2.5 py-1 rounded-lg font-bold">\${p.name}</span>\`
+        \`<span class="bg-blue-950/80 border border-blue-700/60 text-blue-200 px-2.5 py-1 rounded-lg font-bold">💊 \${p.name}</span>\`
       ).join('');
     });
 
@@ -389,7 +438,7 @@ function getProjectorHTML(host) {
       }
       repeatedNames.push(finalWinner);
 
-      reel.innerHTML = repeatedNames.map(name => \`<div class="slot-item \${textColorClass}">\${name}</div>\`).join('');
+      reel.innerHTML = repeatedNames.map(name => \`<div class="slot-item \${textColorClass}">🩺 \${name}</div>\`).join('');
 
       let currentIndex = 0;
       let speed = 35;
@@ -407,8 +456,8 @@ function getProjectorHTML(host) {
     }
 
     socket.on('answer_received', (data) => {
-      document.getElementById('scoreA').innerText = data.scores.A + ' نقطة';
-      document.getElementById('scoreB').innerText = data.scores.B + ' نقطة';
+      document.getElementById('scoreA').innerText = data.scores.A + ' نقطة 🩸';
+      document.getElementById('scoreB').innerText = data.scores.B + ' نقطة 💊';
     });
 
     socket.on('round_ended', () => {
