@@ -46,12 +46,12 @@ let gameState = {
   answers: { A: null, B: null }
 };
 
-// 1. Student Direct Link (Name Input View)
+// 1. Student Direct Route (Name Entry Interface)
 app.get('/', (req, res) => {
   res.send(getStudentHTML());
 });
 
-// 2. Projector Dedicated Link (Main Display View)
+// 2. Projector Route (Main Display Interface)
 app.get('/projector', (req, res) => {
   res.send(getProjectorHTML(req.headers.host));
 });
@@ -72,7 +72,7 @@ io.on('connection', (socket) => {
 
   socket.on('start_round', () => {
     if (gameState.teamA.length === 0 || gameState.teamB.length === 0) {
-      socket.emit('error_message', 'At least 1 student per team is required to start!');
+      socket.emit('error_message', 'At least 1 student in each team is required to start!');
       return;
     }
 
@@ -138,7 +138,7 @@ server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-// ==================== Student Interface (English Only) ====================
+// ==================== Student Mobile Interface ====================
 function getStudentHTML() {
   return `
 <!DOCTYPE html>
@@ -146,7 +146,7 @@ function getStudentHTML() {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Student Join - Nursing English Challenge</title>
+  <title>Nursing Staff Entry</title>
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -173,7 +173,7 @@ function getStudentHTML() {
         <input id="nameInput" type="text" placeholder="Enter your full name..." class="w-full p-3.5 rounded-xl bg-slate-800/90 text-white border border-teal-500/50 focus:outline-none focus:border-teal-300 text-center font-bold text-lg shadow-inner">
       </div>
       <button onclick="joinGame()" class="w-full bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 active:scale-95 py-3.5 rounded-xl font-black text-lg shadow-lg shadow-teal-950 transition flex items-center justify-center gap-2">
-        <span>🚀</span> Join the Team
+        <span>🚀</span> Join Team
       </button>
     </div>
 
@@ -183,7 +183,7 @@ function getStudentHTML() {
       <div class="p-6 bg-slate-800/90 rounded-2xl border border-teal-500/30 animate-pulse space-y-2">
         <div class="text-4xl">🫀</div>
         <p class="text-slate-200 font-bold">Look at the Projector Screen...</p>
-        <p class="text-xs text-teal-300">Random representative selection in progress!</p>
+        <p class="text-xs text-teal-300">Random selection in progress!</p>
       </div>
     </div>
 
@@ -210,10 +210,10 @@ function getStudentHTML() {
       const badge = document.getElementById('pTeamBadge');
       if (data.team === 'A') {
         badge.className = "inline-block px-5 py-2 rounded-full text-sm font-bold bg-red-950/90 text-red-400 border border-red-500 shadow-lg";
-        badge.innerText = "🚨 Emergency Team (Red)";
+        badge.innerText = "🚨 Emergency Team";
       } else {
         badge.className = "inline-block px-5 py-2 rounded-full text-sm font-bold bg-blue-950/90 text-blue-400 border border-blue-500 shadow-lg";
-        badge.innerText = "🩺 ICU Care Team (Blue)";
+        badge.innerText = "🩺 ICU Care Team";
       }
     });
 
@@ -230,7 +230,7 @@ function getStudentHTML() {
 
       if (isMyTurn) {
         turnBadge.className = "p-4 rounded-2xl font-bold text-base bg-emerald-950/90 text-emerald-300 border border-emerald-500 animate-bounce";
-        turnBadge.innerText = "⚡ IT'S YOUR TURN! Choose the correct answer for your team:";
+        turnBadge.innerText = "⚡ YOUR TURN! Select the correct answer for your team:";
         document.getElementById('questionBox').innerText = data.question;
 
         data.options.forEach((opt, idx) => {
@@ -245,8 +245,8 @@ function getStudentHTML() {
         });
       } else {
         turnBadge.className = "p-4 rounded-2xl font-bold text-sm bg-slate-800/90 text-slate-300 border border-slate-700";
-        turnBadge.innerText = \`🎯 Round Representatives:\\n🚨 Emergency Team: \${data.activeA.name}\\n🩺 ICU Team: \${data.activeB.name}\`;
-        optionsContainer.innerHTML = '<div class="p-4 bg-slate-900/80 text-slate-400 rounded-2xl animate-pulse">⏳ Watch the projector screen to cheer for your team!</div>';
+        turnBadge.innerText = \`🎯 Current Representatives:\\n🚨 Emergency Team: \${data.activeA.name}\\n🩺 ICU Team: \${data.activeB.name}\`;
+        optionsContainer.innerHTML = '<div class="p-4 bg-slate-900/80 text-slate-400 rounded-2xl animate-pulse">⏳ Watch the main projector display!</div>';
       }
     });
 
@@ -257,7 +257,7 @@ function getStudentHTML() {
   `;
 }
 
-// ==================== Projector Interface (English Only) ====================
+// ==================== Projector Display Interface ====================
 function getProjectorHTML(host) {
   return `
 <!DOCTYPE html>
@@ -265,7 +265,7 @@ function getProjectorHTML(host) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Projector Display - Nursing Challenge</title>
+  <title>Nursing Monitor - Projector Screen</title>
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -320,10 +320,10 @@ function getProjectorHTML(host) {
         </div>
         <div>
           <h1 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-teal-300 via-emerald-400 to-cyan-400">
-            Nursing English Challenge
+            Nursing English & Grammar Challenge
           </h1>
           <p class="text-xs text-teal-300/80 mt-1 font-mono flex items-center gap-2">
-            <span>🏥 NURSING DEPARTMENT</span> • <span>GRAMMAR: WHO / WHICH / THAT</span>
+            <span>🏥 NURSING DEPARTMENT</span> • <span>RELATIVE PRONOUNS: WHO / WHICH / THAT</span>
           </p>
         </div>
       </div>
@@ -339,7 +339,7 @@ function getProjectorHTML(host) {
 
     <div class="grid grid-cols-2 gap-8 mb-6">
       
-      <!-- Emergency Team (Red) -->
+      <!-- Emergency Team -->
       <div class="bg-red-950/40 border-2 border-red-500/60 p-6 rounded-3xl relative shadow-2xl backdrop-blur-md">
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-2xl font-black text-red-400 flex items-center gap-2">
@@ -360,7 +360,7 @@ function getProjectorHTML(host) {
         <div id="playersA" class="text-xs text-slate-200 flex flex-wrap gap-1.5 min-h-[30px]"></div>
       </div>
 
-      <!-- ICU Team (Blue) -->
+      <!-- ICU Team -->
       <div class="bg-blue-950/40 border-2 border-blue-500/60 p-6 rounded-3xl relative shadow-2xl backdrop-blur-md">
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-2xl font-black text-blue-400 flex items-center gap-2">
@@ -384,7 +384,7 @@ function getProjectorHTML(host) {
 
     <div class="bg-slate-950/90 p-8 rounded-3xl border border-amber-500/50 text-center mb-6 shadow-2xl relative">
       <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-500 text-slate-950 px-4 py-0.5 rounded-full text-xs font-black tracking-wide">
-        CLINICAL CASE QUESTION 🫀
+        VITAL CLINICAL CASE QUESTION 🫀
       </div>
       <h2 id="projQuestion" class="text-3xl font-black text-amber-300 leading-relaxed mt-2">
         Scan the QR code to join, then click "Start Round"! 🎰
@@ -473,3 +473,4 @@ function getProjectorHTML(host) {
 </html>
   `;
 }
+
