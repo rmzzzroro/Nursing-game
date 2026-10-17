@@ -162,34 +162,34 @@ function getStudentHTML() {
   <div id="playerView" class="w-full max-w-sm bg-slate-900/90 backdrop-blur-xl p-5 rounded-2xl shadow-xl border border-teal-500/30">
     <div id="loginForm" class="space-y-3">
       <div class="text-center">
-        <div class="inline-block p-3 bg-teal-950/80 rounded-full border border-teal-400/40 shadow-md mb-1">
-          <span class="text-3xl">🩺</span>
+        <div class="inline-block p-2.5 bg-teal-950/80 rounded-full border border-teal-400/40 shadow-md mb-1">
+          <span class="text-2xl">🩺</span>
         </div>
-        <h2 class="text-xl font-bold text-teal-400">Nursing Registration</h2>
-        <p class="text-[11px] text-slate-400 mt-0.5">Medical English & Grammar Challenge</p>
+        <h2 class="text-lg font-bold text-teal-400">Nursing Registration</h2>
+        <p class="text-[10px] text-slate-400 mt-0.5">Medical English & Grammar Challenge</p>
       </div>
       <div>
         <label class="block text-xs font-semibold text-teal-200 mb-1">Student / Nurse Name:</label>
-        <input id="nameInput" type="text" placeholder="Enter your full name..." class="w-full p-2.5 rounded-lg bg-slate-800/90 text-white border border-teal-500/40 focus:outline-none focus:border-teal-300 text-center font-medium text-sm shadow-inner">
+        <input id="nameInput" type="text" placeholder="Enter your full name..." class="w-full p-2.5 rounded-lg bg-slate-800/90 text-white border border-teal-500/40 focus:outline-none focus:border-teal-300 text-center font-medium text-xs shadow-inner">
       </div>
-      <button onclick="joinGame()" class="w-full bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 active:scale-95 py-2.5 rounded-lg font-bold text-sm shadow-md transition flex items-center justify-center gap-1.5">
+      <button onclick="joinGame()" class="w-full bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 active:scale-95 py-2.5 rounded-lg font-bold text-xs shadow-md transition flex items-center justify-center gap-1.5">
         <span>🚀</span> Join Team
       </button>
     </div>
 
     <div id="waitScreen" class="hidden text-center py-4 space-y-3">
-      <div class="text-lg font-bold">Welcome <span id="pName" class="text-teal-400"></span> 🩺</div>
-      <div id="pTeamBadge" class="inline-block px-4 py-1.5 rounded-full text-xs font-bold shadow-md"></div>
-      <div class="p-4 bg-slate-800/90 rounded-xl border border-teal-500/30 animate-pulse space-y-1.5">
-        <div class="text-2xl">🫀</div>
+      <div class="text-base font-bold">Welcome <span id="pName" class="text-teal-400"></span> 🩺</div>
+      <div id="pTeamBadge" class="inline-block px-3.5 py-1 rounded-full text-xs font-bold shadow-md"></div>
+      <div class="p-3.5 bg-slate-800/90 rounded-xl border border-teal-500/30 animate-pulse space-y-1">
+        <div class="text-xl">🫀</div>
         <p class="text-slate-200 text-xs font-semibold">Look at the Projector Screen...</p>
         <p class="text-[10px] text-teal-300">Selection in progress!</p>
       </div>
     </div>
 
     <div id="gamePlayArea" class="hidden text-center space-y-3">
-      <div id="turnBadge" class="p-3 rounded-xl font-semibold text-xs shadow-md"></div>
-      <div id="questionBox" class="bg-slate-800/90 p-4 rounded-xl border border-amber-500/40 font-bold text-sm text-amber-300 shadow-inner"></div>
+      <div id="turnBadge" class="p-2.5 rounded-xl font-semibold text-xs shadow-md"></div>
+      <div id="questionBox" class="bg-slate-800/90 p-3.5 rounded-xl border border-amber-500/40 font-bold text-xs text-amber-300 shadow-inner"></div>
       <div id="optionsContainer" class="space-y-2"></div>
     </div>
   </div>
@@ -209,10 +209,10 @@ function getStudentHTML() {
       document.getElementById('pName').innerText = data.name;
       const badge = document.getElementById('pTeamBadge');
       if (data.team === 'A') {
-        badge.className = "inline-block px-4 py-1.5 rounded-full text-xs font-bold bg-red-950/90 text-red-400 border border-red-500/60 shadow-md";
+        badge.className = "inline-block px-3.5 py-1 rounded-full text-xs font-bold bg-red-950/90 text-red-400 border border-red-500/60 shadow-md";
         badge.innerText = "🚨 Emergency Team";
       } else {
-        badge.className = "inline-block px-4 py-1.5 rounded-full text-xs font-bold bg-blue-950/90 text-blue-400 border border-blue-500/60 shadow-md";
+        badge.className = "inline-block px-3.5 py-1 rounded-full text-xs font-bold bg-blue-950/90 text-blue-400 border border-blue-500/60 shadow-md";
         badge.innerText = "🩺 ICU Care Team";
       }
     });
@@ -229,24 +229,24 @@ function getStudentHTML() {
       optionsContainer.innerHTML = '';
 
       if (isMyTurn) {
-        turnBadge.className = "p-3 rounded-xl font-bold text-xs bg-emerald-950/90 text-emerald-300 border border-emerald-500 animate-bounce";
+        turnBadge.className = "p-2.5 rounded-xl font-bold text-xs bg-emerald-950/90 text-emerald-300 border border-emerald-500 animate-bounce";
         turnBadge.innerText = "⚡ YOUR TURN! Select the correct answer:";
         document.getElementById('questionBox').innerText = data.question;
 
         data.options.forEach((opt, idx) => {
           const btn = document.createElement('button');
-          btn.className = "w-full bg-gradient-to-r from-teal-700 to-cyan-700 hover:from-teal-600 hover:to-cyan-600 active:scale-95 text-white p-3 rounded-xl font-bold text-sm transition shadow-sm flex items-center justify-between px-4 border border-teal-400/30";
+          btn.className = "w-full bg-gradient-to-r from-teal-700 to-cyan-700 hover:from-teal-600 hover:to-cyan-600 active:scale-95 text-white p-2.5 rounded-xl font-bold text-xs transition shadow-sm flex items-center justify-between px-3.5 border border-teal-400/30";
           btn.innerHTML = \`<span>\${opt}</span> <span>💉</span>\`;
           btn.onclick = () => {
             socket.emit('submit_answer', idx);
-            optionsContainer.innerHTML = '<div class="p-3 bg-emerald-950/90 text-emerald-300 border border-emerald-500 rounded-xl font-bold text-xs">✅ Answer submitted!</div>';
+            optionsContainer.innerHTML = '<div class="p-2.5 bg-emerald-950/90 text-emerald-300 border border-emerald-500 rounded-xl font-bold text-xs">✅ Answer submitted!</div>';
           };
           optionsContainer.appendChild(btn);
         });
       } else {
-        turnBadge.className = "p-3 rounded-xl font-medium text-xs bg-slate-800/90 text-slate-300 border border-slate-700";
+        turnBadge.className = "p-2.5 rounded-xl font-medium text-xs bg-slate-800/90 text-slate-300 border border-slate-700";
         turnBadge.innerText = \`🎯 Representatives:\\n🚨 Emergency: \${data.activeA.name}\\n🩺 ICU: \${data.activeB.name}\`;
-        optionsContainer.innerHTML = '<div class="p-3 bg-slate-900/80 text-slate-400 rounded-xl text-xs animate-pulse">⏳ Watch the projector display!</div>';
+        optionsContainer.innerHTML = '<div class="p-2.5 bg-slate-900/80 text-slate-400 rounded-xl text-xs animate-pulse">⏳ Watch the projector display!</div>';
       }
     });
 
@@ -257,7 +257,7 @@ function getStudentHTML() {
   `;
 }
 
-// ==================== Projector Display Interface ====================
+// ==================== Projector Compact & Elegant Display Interface ====================
 function getProjectorHTML(host) {
   return `
 <!DOCTYPE html>
@@ -276,28 +276,28 @@ function getProjectorHTML(host) {
       background-attachment: fixed;
     }
     .slot-container {
-      height: 70px;
+      height: 52px;
       overflow: hidden;
       position: relative;
-      border-radius: 1rem;
+      border-radius: 0.75rem;
       background: #020617;
-      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.9);
+      box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.8);
     }
     .slot-reel {
       transition: transform 0.1s linear;
     }
     .slot-item {
-      height: 70px;
+      height: 52px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.35rem;
-      font-weight: 800;
+      font-size: 1.05rem;
+      font-weight: 700;
     }
     .ecg-line {
-      height: 3px;
+      height: 2px;
       background: linear-gradient(90deg, #10b981 0%, #34d399 50%, transparent 100%);
-      animation: pulse-line 2s infinite linear;
+      animation: pulse-line 2.5s infinite linear;
     }
     @keyframes pulse-line {
       0% { transform: translateX(-100%); }
@@ -305,98 +305,98 @@ function getProjectorHTML(host) {
     }
   </style>
 </head>
-<body class="text-slate-100 min-h-screen p-5 font-sans flex flex-col items-center justify-center relative">
+<body class="text-slate-100 min-h-screen p-4 font-sans flex flex-col items-center justify-center relative">
 
-  <div id="displayView" class="w-full max-w-5xl bg-slate-900/90 backdrop-blur-xl p-6 rounded-2xl shadow-2xl border border-teal-500/30 relative">
+  <div id="displayView" class="w-full max-w-4xl bg-slate-900/90 backdrop-blur-xl p-5 rounded-2xl shadow-xl border border-teal-500/30 relative">
     
-    <div class="w-full overflow-hidden rounded-t-lg mb-3 bg-slate-950/80 h-1.5 relative">
+    <div class="w-full overflow-hidden rounded-t-lg mb-2.5 bg-slate-950/80 h-1 relative">
       <div class="ecg-line w-full"></div>
     </div>
 
-    <div class="flex justify-between items-center mb-5 pb-3 border-b border-teal-500/20 px-1">
-      <div class="flex items-center gap-3">
-        <div class="p-2.5 bg-teal-950/80 rounded-xl border border-teal-400/40 text-2xl shadow-inner text-teal-300">
+    <div class="flex justify-between items-center mb-4 pb-2.5 border-b border-teal-500/20 px-1">
+      <div class="flex items-center gap-2.5">
+        <div class="p-2 bg-teal-950/80 rounded-lg border border-teal-400/40 text-xl shadow-inner text-teal-300">
           🩺
         </div>
         <div>
-          <h1 class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-300 via-emerald-400 to-cyan-400">
+          <h1 class="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-300 via-emerald-400 to-cyan-400">
             Nursing English & Grammar Challenge
           </h1>
-          <p class="text-[11px] text-teal-300/70 mt-0.5 font-mono flex items-center gap-2">
+          <p class="text-[10px] text-teal-300/70 font-mono flex items-center gap-1.5 mt-0.5">
             <span>🏥 NURSING DEPARTMENT</span> • <span>GRAMMAR: WHO / WHICH / THAT</span>
           </p>
         </div>
       </div>
       
-      <div class="flex items-center gap-2.5 bg-slate-950/90 p-2 rounded-xl border border-teal-500/40 shadow-lg">
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=https://${host}/" alt="QR Code" class="w-14 h-14 rounded-md border border-teal-400/30">
+      <div class="flex items-center gap-2 bg-slate-950/90 p-1.5 rounded-lg border border-teal-500/30 shadow-md">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=65x65&data=https://${host}/" alt="QR Code" class="w-12 h-12 rounded border border-teal-400/30">
         <div class="text-left">
-          <p class="text-[11px] font-bold text-emerald-400 flex items-center gap-1">📱 SCAN TO JOIN 💉</p>
-          <p class="text-[9px] text-slate-400 mt-0.5 font-mono break-all max-w-[110px]">${host}</p>
+          <p class="text-[10px] font-bold text-emerald-400 flex items-center gap-1">📱 SCAN TO JOIN 💉</p>
+          <p class="text-[8px] text-slate-400 font-mono break-all max-w-[95px]">${host}</p>
         </div>
       </div>
     </div>
 
-    <div class="grid grid-cols-2 gap-6 mb-5">
+    <div class="grid grid-cols-2 gap-4 mb-4">
       
       <!-- Emergency Team -->
-      <div class="bg-red-950/30 border border-red-500/50 p-4 rounded-2xl relative shadow-lg backdrop-blur-md">
-        <div class="flex justify-between items-center mb-3">
-          <h3 class="text-base font-bold text-red-400 flex items-center gap-1.5">
+      <div class="bg-red-950/30 border border-red-500/40 p-3.5 rounded-xl relative shadow-md backdrop-blur-md">
+        <div class="flex justify-between items-center mb-2">
+          <h3 class="text-sm font-bold text-red-400 flex items-center gap-1">
             <span>🚨</span> Emergency Team
           </h3>
-          <span id="scoreA" class="text-base font-bold text-red-400 bg-red-950/90 px-3 py-1 rounded-lg border border-red-700/70 font-mono shadow-inner">
+          <span id="scoreA" class="text-xs font-bold text-red-400 bg-red-950/90 px-2.5 py-0.5 rounded border border-red-700/60 font-mono shadow-inner">
             0 BPM
           </span>
         </div>
-        <div class="slot-container border border-red-500/60 mb-3">
+        <div class="slot-container border border-red-500/50 mb-2">
           <div id="reelA" class="slot-reel">
-            <div class="slot-item text-red-400 font-mono text-sm">Waiting for staff... 🚑</div>
+            <div class="slot-item text-red-400 font-mono text-xs">Waiting for staff... 🚑</div>
           </div>
         </div>
-        <div class="text-[11px] font-semibold text-slate-300 mb-1 flex items-center gap-1">
+        <div class="text-[10px] font-semibold text-slate-300 mb-0.5 flex items-center gap-1">
           <span>👨‍⚕️</span> Members:
         </div>
-        <div id="playersA" class="text-[11px] text-slate-200 flex flex-wrap gap-1 min-h-[24px]"></div>
+        <div id="playersA" class="text-[10px] text-slate-200 flex flex-wrap gap-1 min-h-[20px]"></div>
       </div>
 
       <!-- ICU Team -->
-      <div class="bg-blue-950/30 border border-blue-500/50 p-4 rounded-2xl relative shadow-lg backdrop-blur-md">
-        <div class="flex justify-between items-center mb-3">
-          <h3 class="text-base font-bold text-blue-400 flex items-center gap-1.5">
+      <div class="bg-blue-950/30 border border-blue-500/40 p-3.5 rounded-xl relative shadow-md backdrop-blur-md">
+        <div class="flex justify-between items-center mb-2">
+          <h3 class="text-sm font-bold text-blue-400 flex items-center gap-1">
             <span>🩺</span> ICU Care Team
           </h3>
-          <span id="scoreB" class="text-base font-bold text-blue-400 bg-blue-950/90 px-3 py-1 rounded-lg border border-blue-700/70 font-mono shadow-inner">
+          <span id="scoreB" class="text-xs font-bold text-blue-400 bg-blue-950/90 px-2.5 py-0.5 rounded border border-blue-700/60 font-mono shadow-inner">
             0 BPM
           </span>
         </div>
-        <div class="slot-container border border-blue-500/60 mb-3">
+        <div class="slot-container border border-blue-500/50 mb-2">
           <div id="reelB" class="slot-reel">
-            <div class="slot-item text-blue-400 font-mono text-sm">Waiting for staff... 💉</div>
+            <div class="slot-item text-blue-400 font-mono text-xs">Waiting for staff... 💉</div>
           </div>
         </div>
-        <div class="text-[11px] font-semibold text-slate-300 mb-1 flex items-center gap-1">
+        <div class="text-[10px] font-semibold text-slate-300 mb-0.5 flex items-center gap-1">
           <span>👩‍⚕️</span> Members:
         </div>
-        <div id="playersB" class="text-[11px] text-slate-200 flex flex-wrap gap-1 min-h-[24px]"></div>
+        <div id="playersB" class="text-[10px] text-slate-200 flex flex-wrap gap-1 min-h-[20px]"></div>
       </div>
     </div>
 
-    <div class="bg-slate-950/90 p-5 rounded-2xl border border-amber-500/40 text-center mb-5 shadow-xl relative">
-      <div class="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-amber-500 text-slate-950 px-3 py-0.2 rounded-full text-[10px] font-bold tracking-wider">
+    <div class="bg-slate-950/90 p-4 rounded-xl border border-amber-500/40 text-center mb-4 shadow-lg relative">
+      <div class="absolute -top-2 left-1/2 -translate-x-1/2 bg-amber-500 text-slate-950 px-2.5 py-0.2 rounded-full text-[9px] font-bold tracking-wider">
         CLINICAL CASE QUESTION 🫀
       </div>
-      <h2 id="projQuestion" class="text-xl font-bold text-amber-300 leading-snug mt-1">
+      <h2 id="projQuestion" class="text-base font-bold text-amber-300 leading-snug mt-0.5">
         Scan the QR code to join, then click "Start Wheel"! 🎰
       </h2>
     </div>
 
     <div class="flex justify-between items-center">
-      <div class="text-[11px] text-emerald-400 font-mono flex items-center gap-1.5 bg-slate-950 px-2.5 py-1 rounded-lg border border-emerald-500/30">
-        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+      <div class="text-[10px] text-emerald-400 font-mono flex items-center gap-1.5 bg-slate-950 px-2 py-0.5 rounded border border-emerald-500/30">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
         <span>SYSTEM ONLINE</span>
       </div>
-      <button onclick="startRound()" class="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 active:scale-95 text-white px-8 py-2.5 rounded-xl font-bold text-base shadow-lg shadow-emerald-950/50 transition flex items-center gap-2 border border-emerald-400/30">
+      <button onclick="startRound()" class="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 active:scale-95 text-white px-6 py-2 rounded-lg font-bold text-sm shadow-md shadow-emerald-950/50 transition flex items-center gap-1.5 border border-emerald-400/30">
         <span>🎰</span> Start Wheel
       </button>
     </div>
@@ -410,11 +410,11 @@ function getProjectorHTML(host) {
       const teamB = players.filter(p => p.team === 'B');
 
       document.getElementById('playersA').innerHTML = teamA.map(p => 
-        \`<span class="bg-red-950/90 border border-red-700/70 text-red-200 px-2 py-0.5 rounded text-[11px] font-medium">🚑 \${p.name}</span>\`
+        \`<span class="bg-red-950/90 border border-red-700/70 text-red-200 px-1.5 py-0.2 rounded text-[10px] font-medium">🚑 \${p.name}</span>\`
       ).join('');
 
       document.getElementById('playersB').innerHTML = teamB.map(p => 
-        \`<span class="bg-blue-950/90 border border-blue-700/70 text-blue-200 px-2 py-0.5 rounded text-[11px] font-medium">🩺 \${p.name}</span>\`
+        \`<span class="bg-blue-950/90 border border-blue-700/70 text-blue-200 px-1.5 py-0.2 rounded text-[10px] font-medium">🩺 \${p.name}</span>\`
       ).join('');
     });
 
@@ -446,7 +446,7 @@ function getProjectorHTML(host) {
 
       function spin() {
         currentIndex++;
-        reel.style.transform = \`translateY(-\${currentIndex * 70}px)\`;
+        reel.style.transform = \`translateY(-\${currentIndex * 52}px)\`;
 
         if (currentIndex < repeatedNames.length - 1) {
           if (currentIndex > repeatedNames.length - 6) speed += 50;
