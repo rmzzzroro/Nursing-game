@@ -6,31 +6,109 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
 
-// Questions Bank (Who / Which / That in Nursing Context)
+// Full Questions Bank (Unit 92 & Unit 93 Grammar Exercises)
 const questions = [
+  // --- Unit 92 Exercises ---
   {
-    text: "The nurse _____ was assigned to the ICU checked the vital signs.",
-    options: ["Who", "Which", "That"],
+    text: "An architect is someone _____ designs buildings.",
+    options: ["who", "which", "what"],
     correct: 0
   },
   {
-    text: "The ECG machine _____ was bought last month needs calibration.",
-    options: ["Who", "Which", "That"],
-    correct: 1
-  },
-  {
-    text: "Patients _____ suffer from hypertension should reduce salt intake.",
-    options: ["Who", "Which", "That"],
+    text: "A burglar is someone _____ breaks into a house to steal things.",
+    options: ["who", "which", "where"],
     correct: 0
   },
   {
-    text: "The stethoscope _____ I bought yesterday has great sound quality.",
-    options: ["Who", "Which", "That"],
-    correct: 2
+    text: "A customer is someone _____ buys something from a shop.",
+    options: ["who", "which", "what"],
+    correct: 0
   },
   {
-    text: "The doctor _____ performed the surgery explained the risks.",
-    options: ["Who", "Which", "That"],
+    text: "A coward is someone who _____.",
+    options: ["is not brave", "doesn't tell the truth", "pays rent to live"],
+    correct: 0
+  },
+  {
+    text: "Combine: 'A waiter served us. He was impolite.' -> The waiter _____",
+    options: ["who served us was impolite", "which served us was impolite", "what served us was impolite"],
+    correct: 0
+  },
+  {
+    text: "Combine: 'A building was destroyed. It has been rebuilt.' -> The building _____",
+    options: ["that was destroyed has been rebuilt", "who was destroyed has been rebuilt", "what was destroyed has been rebuilt"],
+    correct: 0
+  },
+  {
+    text: "Helen works for a company _____ makes furniture.",
+    options: ["that", "who", "what"],
+    correct: 0
+  },
+  {
+    text: "History is the study of things _____ happened in the past.",
+    options: ["that", "who", "where"],
+    correct: 0
+  },
+  {
+    text: "Correct the sentence: 'I don't like stories who have unhappy endings.'",
+    options: ["stories that/which have", "stories who have (Correct)", "stories what have"],
+    correct: 0
+  },
+  {
+    text: "Correct the sentence: 'The driver which caused the accident was fined £500.'",
+    options: ["The driver who/that caused", "The driver which caused (Correct)", "The driver what caused"],
+    correct: 0
+  },
+
+  // --- Unit 93 Exercises ---
+  {
+    text: "Did you find the keys _____ you lost?",
+    options: ["that / (no pronoun)", "what", "who"],
+    correct: 0
+  },
+  {
+    text: "The museum _____ we wanted to visit was shut.",
+    options: ["that / (no pronoun)", "who", "what"],
+    correct: 0
+  },
+  {
+    text: "Complete: 'Did you find the books _____ ?'",
+    options: ["you were looking for", "for you were looking", "were you looking for"],
+    correct: 0
+  },
+  {
+    text: "Complete: 'We couldn't go to the wedding _____ .'",
+    options: ["we were invited to", "to we were invited", "were we invited to"],
+    correct: 0
+  },
+  {
+    text: "Complete: 'What's the name of the hotel _____ ?'",
+    options: ["you told me about", "about you told me", "did you tell me"],
+    correct: 0
+  },
+  {
+    text: "Complete: 'I gave her all the money _____ I had.'",
+    options: ["that", "what", "where"],
+    correct: 0
+  },
+  {
+    text: "Complete: 'Did you hear _____ they said?'",
+    options: ["what", "that", "which"],
+    correct: 0
+  },
+  {
+    text: "Complete: 'Tell me _____ you want and I'll try to get it for you.'",
+    options: ["what", "that", "where"],
+    correct: 0
+  },
+  {
+    text: "Complete: 'I won't be able to do much, but I'll do the best _____ I can.'",
+    options: ["that", "what", "where"],
+    correct: 0
+  },
+  {
+    text: "Complete: 'I don't trust him. I don't believe anything _____ he says.'",
+    options: ["that", "what", "where"],
     correct: 0
   }
 ];
@@ -257,7 +335,7 @@ function getStudentHTML() {
   `;
 }
 
-// ==================== Projector Compact & Elegant Display Interface ====================
+// ==================== Projector Display Interface ====================
 function getProjectorHTML(host) {
   return `
 <!DOCTYPE html>
