@@ -47,14 +47,14 @@ let gameState = {
   answers: { A: null, B: null }
 };
 
-// 1. رابط الطلاب المباشر (يدخل فوراً لشاشة إدخال الاسم فقط)
+// 1. رابط الطالب المباشر (عند مسح الـ QR أو فتح الرابط الرئيسي) -> شاشة إدخال الاسم فقط
 app.get('/', (req, res) => {
-  res.send(getHTMLContent(req.headers.host, 'player'));
+  res.send(getStudentHTML());
 });
 
-// 2. رابط البروجيكتر المخصص للشاشة الرئيسية
+// 2. رابط البروجيكتر المخصص للشاشة الرئيسية -> شاشة العرض فقط
 app.get('/projector', (req, res) => {
-  res.send(getHTMLContent(req.headers.host, 'projector'));
+  res.send(getProjectorHTML(req.headers.host));
 });
 
 io.on('connection', (socket) => {
@@ -142,16 +142,125 @@ server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-function getHTMLContent(host, defaultRole) {
-  const isProjector = (defaultRole === 'projector');
-  
+// ==================== واجهة الطالب (تفتح تلقائياً عند مسح الـ QR) ====================
+function getStudentHTML() {
   return `
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${isProjector ? 'شاشة العرض - لعبة التمريض' : 'انضمام الطالب - لعبة التمريض'}</title>
+  <title>انضمام الطالب - لعبة التمريض</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen p-4 font-sans flex flex-col items-center justify-center">
+
+  <div id="playerView" class="w-full max-w-md bg-slate-800 p-6 rounded-3xl shadow-2xl border border-slate-700">
+    <div id="loginForm" class="space-y-4">
+      <div class="text-center">
+        <span class="text-5xl">🩺</span>
+        <h2 class="text-2xl font-bold mt-2 text-blue-400">انضمام لسباق التمريض</h2>
+        <p class="text-xs text-slate-400 mt-1">تحدي قواعد Who, Which, That</p>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-slate-300 mb-1">اسم الطالب / الطالبة:</label>
+        <input id="nameInput" type="text" placeholder="أدخل اسمك هنا..." class="w-full p-3.5 rounded-xl bg-slate-700 text-white border border-slate-600 focus:outline-none focus:border-blue-500 text-center font-bold text-lg">
+      </div>
+      <button onclick="joinGame()" class="w-full bg-blue-600 hover:bg-blue-500 active:scale-95 py-3.5 rounded-xl font-bold text-lg shadow-lg transition">
+        🚀 دخول اللعبة
+      </button>
+    </div>
+
+    <div id="waitScreen" class="hidden text-center py-6 space-y-4">
+      <div class="text-2xl font-bold">مرحباً <span id="pName" class="text-blue-400"></span></div>
+      <div id="pTeamBadge" class="inline-block px-4 py-1.5 rounded-full text-sm font-bold"></div>
+      <div class="p-6 bg-slate-700/40 rounded-2xl border border-slate-600 animate-pulse space-y-2">
+        <div class="text-3xl">⏳</div>
+        <p class="text-slate-300 font-medium">الرجاء النظر لشاشة البروجيكتر...</p>
+        <p class="text-xs text-slate-400">جاري اختيار الممثل عشوائياً!</p>
+      </div>
+    </div>
+
+    <div id="gamePlayArea" class="hidden text-center space-y-4">
+      <div id="turnBadge" class="p-4 rounded-2xl font-bold text-base shadow-md"></div>
+      <div id="questionBox" class="bg-slate-700/70 p-5 rounded-2xl border border-slate-600 font-bold text-lg text-amber-300"></div>
+      <div id="optionsContainer" class="space-y-3"></div>
+    </div>
+  </div>
+
+  <script>
+    const socket = io();
+
+    function joinGame() {
+      const name = document.getElementById('nameInput').value.trim();
+      if (!name) return alert('يرجى إدخال اسمك أولاً!');
+      socket.emit('join_game', name);
+    }
+
+    socket.on('joined_successfully', (data) => {
+      document.getElementById('loginForm').classList.add('hidden');
+      document.getElementById('waitScreen').classList.remove('hidden');
+      document.getElementById('pName').innerText = data.name;
+      const badge = document.getElementById('pTeamBadge');
+      if (data.team === 'A') {
+        badge.className = "inline-block px-4 py-1.5 rounded-full text-sm font-bold bg-red-500/20 text-red-400 border border-red-500";
+        badge.innerText = "🔴 الفريق الأحمر";
+      } else {
+        badge.className = "inline-block px-4 py-1.5 rounded-full text-sm font-bold bg-blue-500/20 text-blue-400 border border-blue-500";
+        badge.innerText = "🔵 الفريق الأزرق";
+      }
+    });
+
+    socket.on('round_started', (data) => {
+      const myId = socket.id;
+      const isMyTurn = (data.activeA.id === myId) || (data.activeB.id === myId);
+
+      document.getElementById('waitScreen').classList.add('hidden');
+      document.getElementById('gamePlayArea').classList.remove('hidden');
+
+      const turnBadge = document.getElementById('turnBadge');
+      const optionsContainer = document.getElementById('optionsContainer');
+      optionsContainer.innerHTML = '';
+
+      if (isMyTurn) {
+        turnBadge.className = "p-4 rounded-2xl font-bold text-base bg-emerald-500/20 text-emerald-300 border border-emerald-500 animate-bounce";
+        turnBadge.innerText = "🔥 وقع الاختيار عليك! اختر الإجابة الصحيحة لفريقك!";
+        document.getElementById('questionBox').innerText = data.question;
+
+        data.options.forEach((opt, idx) => {
+          const btn = document.createElement('button');
+          btn.className = "w-full bg-blue-600 hover:bg-blue-500 active:scale-95 text-white p-4 rounded-2xl font-black text-lg transition shadow-md";
+          btn.innerText = opt;
+          btn.onclick = () => {
+            socket.emit('submit_answer', idx);
+            optionsContainer.innerHTML = '<div class="p-4 bg-emerald-500/20 text-emerald-300 border border-emerald-500 rounded-2xl font-bold">✅ تم إرسال الإجابة!</div>';
+          };
+          optionsContainer.appendChild(btn);
+        });
+      } else {
+        turnBadge.className = "p-4 rounded-2xl font-bold text-sm bg-slate-700/60 text-slate-300 border border-slate-600";
+        turnBadge.innerText = \`🎯 الممثلون المختارون:\\n🔴 الفريق الأحمر: \${data.activeA.name}\\n🔵 الفريق الأزرق: \${data.activeB.name}\`;
+        optionsContainer.innerHTML = '<div class="p-4 bg-slate-800 text-slate-400 rounded-2xl animate-pulse">⏳ شجع ممثل فريقك الآن!</div>';
+      }
+    });
+
+    socket.on('error_message', (msg) => alert(msg));
+  </script>
+</body>
+</html>
+  `;
+}
+
+// ==================== واجهة البروجيكتر (تفتح عبر /projector فقط) ====================
+function getProjectorHTML(host) {
+  return `
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>شاشة العرض - لعبة التمريض</title>
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -177,42 +286,6 @@ function getHTMLContent(host, defaultRole) {
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen p-4 font-sans flex flex-col items-center justify-center">
 
-${!isProjector ? `
-  <!-- واجهة الطالب الخاصة بالهاتف فقط -->
-  <div id="playerView" class="w-full max-w-md bg-slate-800 p-6 rounded-3xl shadow-2xl border border-slate-700">
-    <div id="loginForm" class="space-y-4">
-      <div class="text-center">
-        <span class="text-5xl">🩺</span>
-        <h2 class="text-2xl font-bold mt-2 text-blue-400">انضمام لسباق التمريض</h2>
-        <p class="text-xs text-slate-400 mt-1">تحدي قواعد Who, Which, That</p>
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-slate-300 mb-1">اسم الطالب / الطالبة:</label>
-        <input id="nameInput" type="text" placeholder="أدخل اسمك..." class="w-full p-3.5 rounded-xl bg-slate-700 text-white border border-slate-600 focus:outline-none focus:border-blue-500 text-center font-bold text-lg">
-      </div>
-      <button onclick="joinGame()" class="w-full bg-blue-600 hover:bg-blue-500 active:scale-95 py-3.5 rounded-xl font-bold text-lg shadow-lg transition">
-        🚀 دخول اللعبة
-      </button>
-    </div>
-
-    <div id="waitScreen" class="hidden text-center py-6 space-y-4">
-      <div class="text-2xl font-bold">مرحباً <span id="pName" class="text-blue-400"></span></div>
-      <div id="pTeamBadge" class="inline-block px-4 py-1.5 rounded-full text-sm font-bold"></div>
-      <div class="p-6 bg-slate-700/40 rounded-2xl border border-slate-600 animate-pulse space-y-2">
-        <div class="text-3xl">⏳</div>
-        <p class="text-slate-300 font-medium">الرجاء النظر لشاشة البروجيكتر...</p>
-        <p class="text-xs text-slate-400">جاري اختيار الممثل عشوائياً!</p>
-      </div>
-    </div>
-
-    <div id="gamePlayArea" class="hidden text-center space-y-4">
-      <div id="turnBadge" class="p-4 rounded-2xl font-bold text-base shadow-md"></div>
-      <div id="questionBox" class="bg-slate-700/70 p-5 rounded-2xl border border-slate-600 font-bold text-lg text-amber-300"></div>
-      <div id="optionsContainer" class="space-y-3"></div>
-    </div>
-  </div>
-` : `
-  <!-- واجهة البروجيكتر الرئيسية فقط -->
   <div id="displayView" class="w-full max-w-5xl bg-slate-800 p-8 rounded-3xl shadow-2xl border border-slate-700">
     
     <div class="flex justify-between items-center mb-6 border-b border-slate-700 pb-4">
@@ -224,9 +297,9 @@ ${!isProjector ? `
         </div>
       </div>
       
-      <!-- كود QR موجه خصيصاً لشاشة انضمام الطلاب -->
+      <!-- كود الـ QR الموجه مباشرة إلى الرابط الرئيسي الخاص بإدخال الاسم -->
       <div class="flex items-center gap-3 bg-slate-900 p-3 rounded-2xl border border-slate-700">
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=https://${host}/" alt="QR Code" class="w-24 h-24 rounded-lg">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=https://${host}/" alt="QR Code" class="w-24 h-24 rounded-lg">
         <div class="text-right">
           <p class="text-xs font-bold text-emerald-400">📱 امسح الرمز للدخول:</p>
           <p class="text-[10px] text-slate-400 mt-1 break-all max-w-[140px]">${host}</p>
@@ -235,7 +308,6 @@ ${!isProjector ? `
     </div>
 
     <div class="grid grid-cols-2 gap-8 mb-6">
-      
       <!-- الفريق الأحمر -->
       <div class="bg-red-950/40 border-2 border-red-500/50 p-6 rounded-3xl">
         <div class="flex justify-between items-center mb-4">
@@ -279,48 +351,21 @@ ${!isProjector ? `
       </button>
     </div>
   </div>
-`}
 
   <script>
     const socket = io();
-
-    function joinGame() {
-      const name = document.getElementById('nameInput').value.trim();
-      if (!name) return alert('يرجى إدخال اسمك أولاً!');
-      socket.emit('join_game', name);
-    }
-
-    socket.on('joined_successfully', (data) => {
-      if (document.getElementById('loginForm')) document.getElementById('loginForm').classList.add('hidden');
-      if (document.getElementById('waitScreen')) document.getElementById('waitScreen').classList.remove('hidden');
-      if (document.getElementById('pName')) document.getElementById('pName').innerText = data.name;
-      const badge = document.getElementById('pTeamBadge');
-      if (badge) {
-        if (data.team === 'A') {
-          badge.className = "inline-block px-4 py-1.5 rounded-full text-sm font-bold bg-red-500/20 text-red-400 border border-red-500";
-          badge.innerText = "🔴 الفريق الأحمر";
-        } else {
-          badge.className = "inline-block px-4 py-1.5 rounded-full text-sm font-bold bg-blue-500/20 text-blue-400 border border-blue-500";
-          badge.innerText = "🔵 الفريق الأزرق";
-        }
-      }
-    });
 
     socket.on('update_players', (players) => {
       const teamA = players.filter(p => p.team === 'A');
       const teamB = players.filter(p => p.team === 'B');
 
-      if (document.getElementById('playersA')) {
-        document.getElementById('playersA').innerHTML = teamA.map(p => 
-          \`<span class="bg-red-900/40 border border-red-700/50 px-2.5 py-1 rounded-lg font-bold">\${p.name}</span>\`
-        ).join('');
-      }
+      document.getElementById('playersA').innerHTML = teamA.map(p => 
+        \`<span class="bg-red-900/40 border border-red-700/50 px-2.5 py-1 rounded-lg font-bold">\${p.name}</span>\`
+      ).join('');
 
-      if (document.getElementById('playersB')) {
-        document.getElementById('playersB').innerHTML = teamB.map(p => 
-          \`<span class="bg-blue-900/40 border border-blue-700/50 px-2.5 py-1 rounded-lg font-bold">\${p.name}</span>\`
-        ).join('');
-      }
+      document.getElementById('playersB').innerHTML = teamB.map(p => 
+        \`<span class="bg-blue-900/40 border border-blue-700/50 px-2.5 py-1 rounded-lg font-bold">\${p.name}</span>\`
+      ).join('');
     });
 
     function startRound() {
@@ -328,48 +373,9 @@ ${!isProjector ? `
     }
 
     socket.on('round_started', (data) => {
-      const projQ = document.getElementById('projQuestion');
-      if (projQ) projQ.innerText = \`السؤال (\${data.questionNum}): \${data.question}\`;
-
-      if (document.getElementById('reelA')) runSlotMachine('reelA', data.teamAPlayers, data.activeA.name, 'text-red-400');
-      if (document.getElementById('reelB')) runSlotMachine('reelB', data.teamBPlayers, data.activeB.name, 'text-blue-400');
-
-      const myId = socket.id;
-      const isMyTurn = (data.activeA.id === myId) || (data.activeB.id === myId);
-
-      const waitScr = document.getElementById('waitScreen');
-      const gamePlay = document.getElementById('gamePlayArea');
-      if (waitScr) waitScr.classList.add('hidden');
-      if (gamePlay) gamePlay.classList.remove('hidden');
-
-      const turnBadge = document.getElementById('turnBadge');
-      const optionsContainer = document.getElementById('optionsContainer');
-      if (optionsContainer) optionsContainer.innerHTML = '';
-
-      if (isMyTurn) {
-        if (turnBadge) {
-          turnBadge.className = "p-4 rounded-2xl font-bold text-base bg-emerald-500/20 text-emerald-300 border border-emerald-500 animate-bounce";
-          turnBadge.innerText = "🔥 وقع الاختيار عليك! اختر الإجابة الصحيحة لفريقك!";
-        }
-        if (document.getElementById('questionBox')) document.getElementById('questionBox').innerText = data.question;
-
-        if (optionsContainer) {
-          data.options.forEach((opt, idx) => {
-            const btn = document.createElement('button');
-            btn.className = "w-full bg-blue-600 hover:bg-blue-500 active:scale-95 text-white p-4 rounded-2xl font-black text-lg transition shadow-md";
-            btn.innerText = opt;
-            btn.onclick = () => {
-              socket.emit('submit_answer', idx);
-              optionsContainer.innerHTML = '<div class="p-4 bg-emerald-500/20 text-emerald-300 border border-emerald-500 rounded-2xl font-bold">✅ تم إرسال الإجابة!</div>';
-            };
-            optionsContainer.appendChild(btn);
-          });
-        }
-      } else if (turnBadge) {
-        turnBadge.className = "p-4 rounded-2xl font-bold text-sm bg-slate-700/60 text-slate-300 border border-slate-600";
-        turnBadge.innerText = \`🎯 الممثلون المختارون:\\n🔴 الفريق الأحمر: \${data.activeA.name}\\n🔵 الفريق الأزرق: \${data.activeB.name}\`;
-        if (optionsContainer) optionsContainer.innerHTML = '<div class="p-4 bg-slate-800 text-slate-400 rounded-2xl animate-pulse">⏳ شجع ممثل فريقك الآن!</div>';
-      }
+      document.getElementById('projQuestion').innerText = \`السؤال (\${data.questionNum}): \${data.question}\`;
+      runSlotMachine('reelA', data.teamAPlayers, data.activeA.name, 'text-red-400');
+      runSlotMachine('reelB', data.teamBPlayers, data.activeB.name, 'text-blue-400');
     });
 
     function runSlotMachine(reelId, playersList, finalWinner, textColorClass) {
@@ -401,10 +407,8 @@ ${!isProjector ? `
     }
 
     socket.on('answer_received', (data) => {
-      const scoreA = document.getElementById('scoreA');
-      const scoreB = document.getElementById('scoreB');
-      if (scoreA) scoreA.innerText = data.scores.A + ' نقطة';
-      if (scoreB) scoreB.innerText = data.scores.B + ' نقطة';
+      document.getElementById('scoreA').innerText = data.scores.A + ' نقطة';
+      document.getElementById('scoreB').innerText = data.scores.B + ' نقطة';
     });
 
     socket.on('round_ended', () => {
