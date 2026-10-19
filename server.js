@@ -8,51 +8,66 @@ const io = new Server(server, { cors: { origin: "*" } });
 
 // Full Questions Bank (Unit 92 & Unit 93 Grammar Exercises)
 const allQuestions = [
-  // Unit 92
-  { text: "An architect is someone _____ designs buildings.", options: ["who", "which", "what"], correct: 0 },
-  { text: "A burglar is someone _____ breaks into a house to steal things.", options: ["who", "which", "where"], correct: 0 },
-  { text: "A customer is someone _____ buys something from a shop.", options: ["who", "which", "what"], correct: 0 },
-  { text: "A coward is someone who _____.", options: ["is not brave", "doesn't tell the truth", "pays rent to live"], correct: 0 },
-  { text: "Combine: 'A waiter served us. He was impolite.' -> The waiter _____", options: ["who served us was impolite", "which served us was impolite", "what served us was impolite"], correct: 0 },
-  { text: "Combine: 'A building was destroyed. It has been rebuilt.' -> The building _____", options: ["that was destroyed has been rebuilt", "who was destroyed has been rebuilt", "what was destroyed has been rebuilt"], correct: 0 },
-  { text: "Helen works for a company _____ makes furniture.", options: ["that", "who", "what"], correct: 0 },
-  { text: "History is the study of things _____ happened in the past.", options: ["that", "who", "where"], correct: 0 },
-  { text: "Correct the sentence: 'I don't like stories who have unhappy endings.'", options: ["stories that/which have", "stories who have (Correct)", "stories what have"], correct: 0 },
-  { text: "Correct the sentence: 'The driver which caused the accident was fined £500.'", options: ["The driver who/that caused", "The driver which caused (Correct)", "The driver what caused"], correct: 0 },
-  // Unit 93
-  { text: "Did you find the keys _____ you lost?", options: ["that / (no pronoun)", "what", "who"], correct: 0 },
-  { text: "The museum _____ we wanted to visit was shut.", options: ["that / (no pronoun)", "who", "what"], correct: 0 },
-  { text: "Complete: 'Did you find the books _____ ?'", options: ["you were looking for", "for you were looking", "were you looking for"], correct: 0 },
-  { text: "Complete: 'We couldn't go to the wedding _____ .'", options: ["we were invited to", "to we were invited", "were we invited to"], correct: 0 },
-  { text: "Complete: 'What's the name of the hotel _____ ?'", options: ["you told me about", "about you told me", "did you tell me"], correct: 0 },
-  { text: "Complete: 'I gave her all the money _____ I had.'", options: ["that", "what", "where"], correct: 0 },
-  { text: "Complete: 'Did you hear _____ they said?'", options: ["what", "that", "which"], correct: 0 },
-  { text: "Complete: 'Tell me _____ you want and I'll try to get it for you.'", options: ["what", "that", "where"], correct: 0 },
-  { text: "Complete: 'I won't be able to do much, but I'll do the best _____ I can.'", options: ["that", "what", "where"], correct: 0 },
-  { text: "Complete: 'I don't trust him. I don't believe anything _____ he says.'", options: ["that", "what", "where"], correct: 0 }
+// Unit 92
+{ text: "An architect is someone _____ designs buildings.", options: ["who", "which", "what"], correctIndex: 0 },
+{ text: "A burglar is someone _____ breaks into a house to steal things.", options: ["who", "which", "where"], correctIndex: 0 },
+{ text: "A customer is someone _____ buys something from a shop.", options: ["who", "which", "what"], correctIndex: 0 },
+{ text: "A coward is someone who _____.", options: ["is not brave", "doesn't tell the truth", "pays rent to live"], correctIndex: 0 },
+{ text: "Combine: 'A waiter served us. He was impolite.' -> The waiter _____", options: ["who served us was impolite", "which served us was impolite", "what served us was impolite"], correctIndex: 0 },
+{ text: "Combine: 'A building was destroyed. It has been rebuilt.' -> The building _____", options: ["that was destroyed has been rebuilt", "who was destroyed has been rebuilt", "what was destroyed has been rebuilt"], correctIndex: 0 },
+{ text: "Helen works for a company _____ makes furniture.", options: ["that", "who", "what"], correctIndex: 0 },
+{ text: "History is the study of things _____ happened in the past.", options: ["that", "who", "where"], correctIndex: 0 },
+{ text: "Correct the sentence: 'I don't like stories who have unhappy endings.'", options: ["stories that/which have", "stories who have (Correct)", "stories what have"], correctIndex: 0 },
+{ text: "Correct the sentence: 'The driver which caused the accident was fined £500.'", options: ["The driver who/that caused", "The driver which caused (Correct)", "The driver what caused"], correctIndex: 0 },
+// Unit 93
+{ text: "Did you find the keys _____ you lost?", options: ["that / (no pronoun)", "what", "who"], correctIndex: 0 },
+{ text: "The museum _____ we wanted to visit was shut.", options: ["that / (no pronoun)", "who", "what"], correctIndex: 0 },
+{ text: "Complete: 'Did you find the books _____ ?'", options: ["you were looking for", "for you were looking", "were you looking for"], correctIndex: 0 },
+{ text: "Complete: 'We couldn't go to the wedding _____ .'", options: ["we were invited to", "to we were invited", "were we invited to"], correctIndex: 0 },
+{ text: "Complete: 'What's the name of the hotel _____ ?'", options: ["you told me about", "about you told me", "did you tell me"], correctIndex: 0 },
+{ text: "Complete: 'I gave her all the money _____ I had.'", options: ["that", "what", "where"], correctIndex: 0 },
+{ text: "Complete: 'Did you hear _____ they said?'", options: ["what", "that", "which"], correctIndex: 0 },
+{ text: "Complete: 'Tell me _____ you want and I'll try to get it for you.'", options: ["what", "that", "where"], correctIndex: 0 },
+{ text: "Complete: 'I won't be able to do much, but I'll do the best _____ I can.'", options: ["that", "what", "where"], correctIndex: 0 },
+{ text: "Complete: 'I don't trust him. I don't believe anything _____ he says.'", options: ["that", "what", "where"], correctIndex: 0 }
 ];
 
 let selectedQuestions = [];
+let currentQuestionOptions = [];
+let currentCorrectIndex = -1;
+
 let gameState = {
-  players: [],
-  teamA: [],
-  teamB: [],
-  currentRound: 0,
-  activePlayerA: null,
-  activePlayerB: null,
-  scores: { A: 0, B: 0 },
-  answers: { A: null, B: null },
-  isGameOver: false
+players: [],
+teamA: [],
+teamB: [],
+currentRound: 0,
+activePlayerA: null,
+activePlayerB: null,
+scores: { A: 0, B: 0 },
+answers: { A: null, B: null },
+isGameOver: false
 };
 
-// Shuffle helper
+// Helper: Shuffle array
 function shuffleArray(array) {
-  let arr = [...array];
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
+let arr = [...array];
+for (let i = arr.length - 1; i > 0; i--) {
+const j = Math.floor(Math.random() * (i + 1));
+[arr[i], arr[j]] = [arr[j], arr[i]];
+}
+return arr;
+}
+
+// Helper: Shuffle question options and update correct index
+function prepareQuestion(questionObj) {
+const correctAnswerText = questionObj.options[questionObj.correctIndex];
+const shuffledOptions = shuffleArray(questionObj.options);
+const newCorrectIndex = shuffledOptions.indexOf(correctAnswerText);
+return {
+text: questionObj.text,
+options: shuffledOptions,
+correctIndex: newCorrectIndex
+};
 }
 
 // Routes
@@ -61,105 +76,104 @@ app.get('/projector', (req, res) => res.send(getProjectorHTML(req.headers.host))
 
 io.on('connection', (socket) => {
 
-  socket.on('join_game', (playerName) => {
-    const team = gameState.teamA.length <= gameState.teamB.length ? 'A' : 'B';
-    const newPlayer = { id: socket.id, name: playerName, team };
-    
-    gameState.players.push(newPlayer);
-    if (team === 'A') gameState.teamA.push(newPlayer);
-    else gameState.teamB.push(newPlayer);
+socket.on('join_game', (playerName) => {
+const team = gameState.teamA.length <= gameState.teamB.length ? 'A' : 'B';
+const newPlayer = { id: socket.id, name: playerName, team };
 
-    socket.emit('joined_successfully', { team, name: playerName });
-    io.emit('update_players', gameState.players);
-  });
+gameState.players.push(newPlayer);
+if (team === 'A') gameState.teamA.push(newPlayer);
+else gameState.teamB.push(newPlayer);
 
-  socket.on('start_round', () => {
-    if (gameState.teamA.length === 0 || gameState.teamB.length === 0) {
-      socket.emit('error_message', 'At least 1 student in each team is required to start!');
-      return;
-    }
+socket.emit('joined_successfully', { team, name: playerName });
+io.emit('update_players', gameState.players);
+});
 
-    // Initialize 10 random questions at first round or reset
-    if (gameState.currentRound === 0 || gameState.isGameOver) {
-      selectedQuestions = shuffleArray(allQuestions).slice(0, 10);
-      gameState.currentRound = 0;
-      gameState.scores = { A: 0, B: 0 };
-      gameState.isGameOver = false;
-    }
+socket.on('start_round', () => {
+if (gameState.teamA.length === 0 || gameState.teamB.length === 0) {
+socket.emit('error_message', 'At least 1 student in each team is required to start!');
+return;
+}
 
-    if (gameState.currentRound >= 10) {
-      return;
-    }
+if (gameState.currentRound === 0 || gameState.isGameOver) {
+selectedQuestions = shuffleArray(allQuestions).slice(0, 10);
+gameState.currentRound = 0;
+gameState.scores = { A: 0, B: 0 };
+gameState.isGameOver = false;
+}
 
-    gameState.answers = { A: null, B: null };
+if (gameState.currentRound >= 10) return;
 
-    const randA = Math.floor(Math.random() * gameState.teamA.length);
-    const randB = Math.floor(Math.random() * gameState.teamB.length);
+gameState.answers = { A: null, B: null };
 
-    gameState.activePlayerA = gameState.teamA[randA];
-    gameState.activePlayerB = gameState.teamB[randB];
+const randA = Math.floor(Math.random() * gameState.teamA.length);
+const randB = Math.floor(Math.random() * gameState.teamB.length);
 
-    const currentQ = selectedQuestions[gameState.currentRound];
+gameState.activePlayerA = gameState.teamA[randA];
+gameState.activePlayerB = gameState.teamB[randB];
 
-    io.emit('round_started', {
-      question: currentQ.text,
-      options: currentQ.options,
-      teamAPlayers: gameState.teamA,
-      teamBPlayers: gameState.teamB,
-      activeA: gameState.activePlayerA,
-      activeB: gameState.activePlayerB,
-      questionNum: gameState.currentRound + 1,
-      totalQuestions: 10
-    });
-  });
+// Shuffle options for the current question
+const preparedQ = prepareQuestion(selectedQuestions[gameState.currentRound]);
+currentQuestionOptions = preparedQ.options;
+currentCorrectIndex = preparedQ.correctIndex;
 
-  socket.on('submit_answer', (optionIndex) => {
-    const isPlayerA = gameState.activePlayerA && gameState.activePlayerA.id === socket.id;
-    const isPlayerB = gameState.activePlayerB && gameState.activePlayerB.id === socket.id;
+io.emit('round_started', {
+question: preparedQ.text,
+options: preparedQ.options,
+teamAPlayers: gameState.teamA,
+teamBPlayers: gameState.teamB,
+activeA: gameState.activePlayerA,
+activeB: gameState.activePlayerB,
+questionNum: gameState.currentRound + 1,
+totalQuestions: 10
+});
+});
 
-    if (!isPlayerA && !isPlayerB) return;
+socket.on('submit_answer', (optionIndex) => {
+const isPlayerA = gameState.activePlayerA && gameState.activePlayerA.id === socket.id;
+const isPlayerB = gameState.activePlayerB && gameState.activePlayerB.id === socket.id;
 
-    const currentQ = selectedQuestions[gameState.currentRound];
-    const isCorrect = optionIndex === currentQ.correct;
+if (!isPlayerA && !isPlayerB) return;
 
-    if (isPlayerA && gameState.answers.A === null) {
-      gameState.answers.A = { optionIndex, isCorrect };
-      if (isCorrect) gameState.scores.A += 10;
-    } else if (isPlayerB && gameState.answers.B === null) {
-      gameState.answers.B = { optionIndex, isCorrect };
-      if (isCorrect) gameState.scores.B += 10;
-    }
+const isCorrect = optionIndex === currentCorrectIndex;
 
-    io.emit('answer_received', {
-      scores: gameState.scores,
-      answers: gameState.answers
-    });
+if (isPlayerA && gameState.answers.A === null) {
+gameState.answers.A = { optionIndex, isCorrect };
+if (isCorrect) gameState.scores.A += 10;
+} else if (isPlayerB && gameState.answers.B === null) {
+gameState.answers.B = { optionIndex, isCorrect };
+if (isCorrect) gameState.scores.B += 10;
+}
 
-    if (gameState.answers.A !== null && gameState.answers.B !== null) {
-      gameState.currentRound++;
-      
-      if (gameState.currentRound >= 10) {
-        gameState.isGameOver = true;
-        let winner = "DRAW";
-        if (gameState.scores.A > gameState.scores.B) winner = "Emergency Team (Red)";
-        else if (gameState.scores.B > gameState.scores.A) winner = "ICU Care Team (Blue)";
+io.emit('answer_received', {
+scores: gameState.scores,
+answers: gameState.answers
+});
 
-        io.emit('game_over', {
-          scores: gameState.scores,
-          winner: winner
-        });
-      } else {
-        io.emit('round_ended', { scores: gameState.scores, nextRound: gameState.currentRound + 1 });
-      }
-    }
-  });
+if (gameState.answers.A !== null && gameState.answers.B !== null) {
+gameState.currentRound++;
 
-  socket.on('disconnect', () => {
-    gameState.players = gameState.players.filter(p => p.id !== socket.id);
-    gameState.teamA = gameState.teamA.filter(p => p.id !== socket.id);
-    gameState.teamB = gameState.teamB.filter(p => p.id !== socket.id);
-    io.emit('update_players', gameState.players);
-  });
+if (gameState.currentRound >= 10) {
+gameState.isGameOver = true;
+let winner = "DRAW";
+if (gameState.scores.A > gameState.scores.B) winner = "Emergency Team (Red)";
+else if (gameState.scores.B > gameState.scores.A) winner = "ICU Care Team (Blue)";
+
+io.emit('game_over', {
+scores: gameState.scores,
+winner: winner
+});
+} else {
+io.emit('round_ended', { scores: gameState.scores, nextRound: gameState.currentRound + 1 });
+}
+}
+});
+
+socket.on('disconnect', () => {
+gameState.players = gameState.players.filter(p => p.id !== socket.id);
+gameState.teamA = gameState.teamA.filter(p => p.id !== socket.id);
+gameState.teamB = gameState.teamB.filter(p => p.id !== socket.id);
+io.emit('update_players', gameState.players);
+});
 });
 
 const PORT = process.env.PORT || 3000;
@@ -167,357 +181,370 @@ server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
 // ==================== Student Mobile Interface ====================
 function getStudentHTML() {
-  return `
+return `
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nursing Staff Entry</title>
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    body {
-      background: linear-gradient(rgba(2, 6, 23, 0.88), rgba(2, 6, 23, 0.95)), url('https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=1000&auto=format&fit=crop');
-      background-size: cover;
-      background-position: center;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nursing Staff Entry</title>
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+body {
+background: linear-gradient(rgba(2, 6, 23, 0.88), rgba(2, 6, 23, 0.95)), url('https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=1000&auto=format&fit=crop');
+background-size: cover;
+background-position: center;
+}
+</style>
 </head>
 <body class="text-slate-100 min-h-screen p-4 font-sans flex flex-col items-center justify-center">
 
-  <div id="playerView" class="w-full max-w-sm bg-slate-900/90 backdrop-blur-xl p-5 rounded-2xl shadow-xl border border-teal-500/30">
-    <div id="loginForm" class="space-y-3">
-      <div class="text-center">
-        <div class="inline-block p-2.5 bg-teal-950/80 rounded-full border border-teal-400/40 shadow-md mb-1">
-          <span class="text-2xl">🩺</span>
-        </div>
-        <h2 class="text-lg font-bold text-teal-400">Nursing Registration</h2>
-        <p class="text-[10px] text-slate-400 mt-0.5">Medical English & Grammar Challenge</p>
-      </div>
-      <div>
-        <label class="block text-xs font-semibold text-teal-200 mb-1">Student / Nurse Name:</label>
-        <input id="nameInput" type="text" placeholder="Enter your full name..." class="w-full p-2.5 rounded-lg bg-slate-800/90 text-white border border-teal-500/40 focus:outline-none focus:border-teal-300 text-center font-medium text-xs shadow-inner">
-      </div>
-      <button onclick="joinGame()" class="w-full bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 active:scale-95 py-2.5 rounded-lg font-bold text-xs shadow-md transition flex items-center justify-center gap-1.5">
-        <span>🚀</span> Join Team
-      </button>
-    </div>
+<div id="playerView" class="w-full max-w-sm bg-slate-900/90 backdrop-blur-xl p-5 rounded-2xl shadow-xl border border-teal-500/30">
+<div id="loginForm" class="space-y-3">
+<div class="text-center">
+<div class="inline-block p-2.5 bg-teal-950/80 rounded-full border border-teal-400/40 shadow-md mb-1">
+<span class="text-2xl">🩺</span>
+</div>
+<h2 class="text-lg font-bold text-teal-400">Nursing Registration</h2>
+<p class="text-[10px] text-slate-400 mt-0.5">Medical English & Grammar Challenge</p>
+</div>
+<div>
+<label class="block text-xs font-semibold text-teal-200 mb-1">Student / Nurse Name:</label>
+<input id="nameInput" type="text" placeholder="Enter your full name..." class="w-full p-2.5 rounded-lg bg-slate-800/90 text-white border border-teal-500/40 focus:outline-none focus:border-teal-300 text-center font-medium text-xs shadow-inner">
+</div>
+<button onclick="joinGame()" class="w-full bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 active:scale-95 py-2.5 rounded-lg font-bold text-xs shadow-md transition flex items-center justify-center gap-1.5">
+<span>🚀</span> Join Team
+</button>
+</div>
 
-    <div id="waitScreen" class="hidden text-center py-4 space-y-3">
-      <div class="text-base font-bold">Welcome <span id="pName" class="text-teal-400"></span> 🩺</div>
-      <div id="pTeamBadge" class="inline-block px-3.5 py-1 rounded-full text-xs font-bold shadow-md"></div>
-      <div class="p-3.5 bg-slate-800/90 rounded-xl border border-teal-500/30 animate-pulse space-y-1">
-        <div class="text-xl">🫀</div>
-        <p class="text-slate-200 text-xs font-semibold">Look at the Projector Screen...</p>
-        <p class="text-[10px] text-teal-300">Selection in progress!</p>
-      </div>
-    </div>
+<div id="waitScreen" class="hidden text-center py-4 space-y-3">
+<div class="text-base font-bold">Welcome <span id="pName" class="text-teal-400"></span> 🩺</div>
+<div id="pTeamBadge" class="inline-block px-3.5 py-1 rounded-full text-xs font-bold shadow-md"></div>
+<div class="p-3.5 bg-slate-800/90 rounded-xl border border-teal-500/30 animate-pulse space-y-1">
+<div class="text-xl">🫀</div>
+<p class="text-slate-200 text-xs font-semibold">Look at the Projector Screen...</p>
+<p class="text-[10px] text-teal-300">Selection in progress!</p>
+</div>
+</div>
 
-    <div id="gamePlayArea" class="hidden text-center space-y-3">
-      <div id="turnBadge" class="p-2.5 rounded-xl font-semibold text-xs shadow-md"></div>
-      <div id="questionBox" class="bg-slate-800/90 p-3.5 rounded-xl border border-amber-500/40 font-bold text-xs text-amber-300 shadow-inner"></div>
-      <div id="optionsContainer" class="space-y-2"></div>
-    </div>
+<div id="gamePlayArea" class="hidden text-center space-y-3">
+<div id="turnBadge" class="p-2.5 rounded-xl font-semibold text-xs shadow-md"></div>
+<div id="questionBox" class="bg-slate-800/90 p-3.5 rounded-xl border border-amber-500/40 font-bold text-xs text-amber-300 shadow-inner"></div>
+<div id="optionsContainer" class="space-y-2"></div>
+</div>
 
-    <div id="gameOverArea" class="hidden text-center space-y-3 p-4 bg-slate-950/90 rounded-xl border border-emerald-500/50">
-      <div class="text-3xl">🏆</div>
-      <h3 class="text-base font-black text-amber-400">MATCH COMPLETED</h3>
-      <p id="winnerMsg" class="text-xs font-bold text-emerald-300"></p>
-    </div>
-  </div>
+<div id="gameOverArea" class="hidden text-center space-y-3 p-4 bg-slate-950/90 rounded-xl border border-emerald-500/50">
+<div class="text-3xl">🏆</div>
+<h3 class="text-base font-black text-amber-400">MATCH COMPLETED</h3>
+<p id="winnerMsg" class="text-xs font-bold text-emerald-300"></p>
+</div>
 
-  <script>
-    const socket = io();
+<div class="mt-4 pt-2 border-t border-slate-800/80 text-center">
+<p class="text-[11px] font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-pink-400 to-teal-300 animate-pulse tracking-wide">
+✨ created by Rimaz ✨
+</p>
+</div>
+</div>
 
-    function joinGame() {
-      const name = document.getElementById('nameInput').value.trim();
-      if (!name) return alert('Please enter your name first!');
-      socket.emit('join_game', name);
-    }
+<script>
+const socket = io();
 
-    socket.on('joined_successfully', (data) => {
-      document.getElementById('loginForm').classList.add('hidden');
-      document.getElementById('waitScreen').classList.remove('hidden');
-      document.getElementById('pName').innerText = data.name;
-      const badge = document.getElementById('pTeamBadge');
-      if (data.team === 'A') {
-        badge.className = "inline-block px-3.5 py-1 rounded-full text-xs font-bold bg-red-950/90 text-red-400 border border-red-500/60 shadow-md";
-        badge.innerText = "🚨 Emergency Team";
-      } else {
-        badge.className = "inline-block px-3.5 py-1 rounded-full text-xs font-bold bg-blue-950/90 text-blue-400 border border-blue-500/60 shadow-md";
-        badge.innerText = "🩺 ICU Care Team";
-      }
-    });
+function joinGame() {
+const name = document.getElementById('nameInput').value.trim();
+if (!name) return alert('Please enter your name first!');
+socket.emit('join_game', name);
+}
 
-    socket.on('round_started', (data) => {
-      const myId = socket.id;
-      const isMyTurn = (data.activeA.id === myId) || (data.activeB.id === myId);
+socket.on('joined_successfully', (data) => {
+document.getElementById('loginForm').classList.add('hidden');
+document.getElementById('waitScreen').classList.remove('hidden');
+document.getElementById('pName').innerText = data.name;
+const badge = document.getElementById('pTeamBadge');
+if (data.team === 'A') {
+badge.className = "inline-block px-3.5 py-1 rounded-full text-xs font-bold bg-red-950/90 text-red-400 border border-red-500/60 shadow-md";
+badge.innerText = "🚨 Emergency Team";
+} else {
+badge.className = "inline-block px-3.5 py-1 rounded-full text-xs font-bold bg-blue-950/90 text-blue-400 border border-blue-500/60 shadow-md";
+badge.innerText = "🩺 ICU Care Team";
+}
+});
 
-      document.getElementById('waitScreen').classList.add('hidden');
-      document.getElementById('gameOverArea').classList.add('hidden');
-      document.getElementById('gamePlayArea').classList.remove('hidden');
+socket.on('round_started', (data) => {
+const myId = socket.id;
+const isMyTurn = (data.activeA.id === myId) || (data.activeB.id === myId);
 
-      const turnBadge = document.getElementById('turnBadge');
-      const optionsContainer = document.getElementById('optionsContainer');
-      optionsContainer.innerHTML = '';
+document.getElementById('waitScreen').classList.add('hidden');
+document.getElementById('gameOverArea').classList.add('hidden');
+document.getElementById('gamePlayArea').classList.remove('hidden');
 
-      if (isMyTurn) {
-        turnBadge.className = "p-2.5 rounded-xl font-bold text-xs bg-emerald-950/90 text-emerald-300 border border-emerald-500 animate-bounce";
-        turnBadge.innerText = "⚡ YOUR TURN! Select the correct answer:";
-        document.getElementById('questionBox').innerText = data.question;
+const turnBadge = document.getElementById('turnBadge');
+const optionsContainer = document.getElementById('optionsContainer');
+optionsContainer.innerHTML = '';
 
-        data.options.forEach((opt, idx) => {
-          const btn = document.createElement('button');
-          btn.className = "w-full bg-gradient-to-r from-teal-700 to-cyan-700 hover:from-teal-600 hover:to-cyan-600 active:scale-95 text-white p-2.5 rounded-xl font-bold text-xs transition shadow-sm flex items-center justify-between px-3.5 border border-teal-400/30";
-          btn.innerHTML = \`<span>\${opt}</span> <span>💉</span>\`;
-          btn.onclick = () => {
-            socket.emit('submit_answer', idx);
-            optionsContainer.innerHTML = '<div class="p-2.5 bg-emerald-950/90 text-emerald-300 border border-emerald-500 rounded-xl font-bold text-xs">✅ Answer submitted!</div>';
-          };
-          optionsContainer.appendChild(btn);
-        });
-      } else {
-        turnBadge.className = "p-2.5 rounded-xl font-medium text-xs bg-slate-800/90 text-slate-300 border border-slate-700";
-        turnBadge.innerText = \`🎯 Representatives:\\n🚨 Emergency: \${data.activeA.name}\\n🩺 ICU: \${data.activeB.name}\`;
-        optionsContainer.innerHTML = '<div class="p-2.5 bg-slate-900/80 text-slate-400 rounded-xl text-xs animate-pulse">⏳ Watch the projector display!</div>';
-      }
-    });
+if (isMyTurn) {
+turnBadge.className = "p-2.5 rounded-xl font-bold text-xs bg-emerald-950/90 text-emerald-300 border border-emerald-500 animate-bounce";
+turnBadge.innerText = "⚡ YOUR TURN! Select the correct answer:";
+document.getElementById('questionBox').innerText = data.question;
 
-    socket.on('game_over', (data) => {
-      document.getElementById('gamePlayArea').classList.add('hidden');
-      document.getElementById('gameOverArea').classList.remove('hidden');
-      document.getElementById('winnerMsg').innerText = "Winner: " + data.winner + "\\nScores -> Red: " + data.scores.A + " BPM | Blue: " + data.scores.B + " BPM";
-    });
+data.options.forEach((opt, idx) => {
+const btn = document.createElement('button');
+btn.className = "w-full bg-gradient-to-r from-teal-700 to-cyan-700 hover:from-teal-600 hover:to-cyan-600 active:scale-95 text-white p-2.5 rounded-xl font-bold text-xs transition shadow-sm flex items-center justify-between px-3.5 border border-teal-400/30";
+btn.innerHTML = \`<span>\${opt}</span> <span>💉</span>\`;
+btn.onclick = () => {
+socket.emit('submit_answer', idx);
+optionsContainer.innerHTML = '<div class="p-2.5 bg-emerald-950/90 text-emerald-300 border border-emerald-500 rounded-xl font-bold text-xs">✅ Answer submitted!</div>';
+};
+optionsContainer.appendChild(btn);
+});
+} else {
+turnBadge.className = "p-2.5 rounded-xl font-medium text-xs bg-slate-800/90 text-slate-300 border border-slate-700";
+turnBadge.innerText = \`🎯 Representatives:\\n🚨 Emergency: \${data.activeA.name}\\n🩺 ICU: \${data.activeB.name}\`;
+optionsContainer.innerHTML = '<div class="p-2.5 bg-slate-900/80 text-slate-400 rounded-xl text-xs animate-pulse">⏳ Watch the projector display!</div>';
+}
+});
 
-    socket.on('error_message', (msg) => alert(msg));
-  </script>
+socket.on('game_over', (data) => {
+document.getElementById('gamePlayArea').classList.add('hidden');
+document.getElementById('gameOverArea').classList.remove('hidden');
+document.getElementById('winnerMsg').innerText = "Winner: " + data.winner + "\\nScores -> Red: " + data.scores.A + " BPM | Blue: " + data.scores.B + " BPM";
+});
+
+socket.on('error_message', (msg) => alert(msg));
+</script>
 </body>
 </html>
-  `;
+`;
 }
 
 // ==================== Projector Display Interface ====================
 function getProjectorHTML(host) {
-  return `
+return `
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nursing Monitor - Projector Screen</title>
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    body {
-      background: linear-gradient(rgba(2, 6, 23, 0.90), rgba(2, 6, 23, 0.96)), url('https://images.unsplash.com/photo-1516549655169-df83a0774514?q=80&w=1200&auto=format&fit=crop');
-      background-size: cover;
-      background-position: center;
-      background-attachment: fixed;
-    }
-    .slot-container {
-      height: 52px;
-      overflow: hidden;
-      position: relative;
-      border-radius: 0.75rem;
-      background: #020617;
-      box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.8);
-    }
-    .slot-reel {
-      transition: transform 0.1s linear;
-    }
-    .slot-item {
-      height: 52px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.05rem;
-      font-weight: 700;
-    }
-    .ecg-line {
-      height: 2px;
-      background: linear-gradient(90deg, #10b981 0%, #34d399 50%, transparent 100%);
-      animation: pulse-line 2.5s infinite linear;
-    }
-    @keyframes pulse-line {
-      0% { transform: translateX(-100%); }
-      100% { transform: translateX(100%); }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nursing Monitor - Projector Screen</title>
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+body {
+background: linear-gradient(rgba(2, 6, 23, 0.90), rgba(2, 6, 23, 0.96)), url('https://images.unsplash.com/photo-1516549655169-df83a0774514?q=80&w=1200&auto=format&fit=crop');
+background-size: cover;
+background-position: center;
+background-attachment: fixed;
+}
+.slot-container {
+height: 52px;
+overflow: hidden;
+position: relative;
+border-radius: 0.75rem;
+background: #020617;
+box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.8);
+}
+.slot-reel {
+transition: transform 0.1s linear;
+}
+.slot-item {
+height: 52px;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 1.05rem;
+font-weight: 700;
+}
+.ecg-line {
+height: 2px;
+background: linear-gradient(90deg, #10b981 0%, #34d399 50%, transparent 100%);
+animation: pulse-line 2.5s infinite linear;
+}
+@keyframes pulse-line {
+0% { transform: translateX(-100%); }
+100% { transform: translateX(100%); }
+}
+</style>
 </head>
 <body class="text-slate-100 min-h-screen p-4 font-sans flex flex-col items-center justify-center relative">
 
-  <div id="displayView" class="w-full max-w-4xl bg-slate-900/90 backdrop-blur-xl p-5 rounded-2xl shadow-xl border border-teal-500/30 relative">
-    
-    <div class="w-full overflow-hidden rounded-t-lg mb-2.5 bg-slate-950/80 h-1 relative">
-      <div class="ecg-line w-full"></div>
-    </div>
+<div id="displayView" class="w-full max-w-4xl bg-slate-900/90 backdrop-blur-xl p-5 rounded-2xl shadow-xl border border-teal-500/30 relative">
 
-    <div class="flex justify-between items-center mb-4 pb-2.5 border-b border-teal-500/20 px-1">
-      <div class="flex items-center gap-2.5">
-        <div class="p-2 bg-teal-950/80 rounded-lg border border-teal-400/40 text-xl shadow-inner text-teal-300">
-          🩺
-        </div>
-        <div>
-          <h1 class="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-300 via-emerald-400 to-cyan-400">
-            Nursing English & Grammar Challenge
-          </h1>
-          <p class="text-[10px] text-teal-300/70 font-mono flex items-center gap-1.5 mt-0.5">
-            <span>🏥 NURSING DEPARTMENT</span> • <span>GRAMMAR: WHO / WHICH / THAT</span>
-          </p>
-        </div>
-      </div>
-      
-      <div class="flex items-center gap-2 bg-slate-950/90 p-1.5 rounded-lg border border-teal-500/30 shadow-md">
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=65x65&data=https://${host}/" alt="QR Code" class="w-12 h-12 rounded border border-teal-400/30">
-        <div class="text-left">
-          <p class="text-[10px] font-bold text-emerald-400 flex items-center gap-1">📱 SCAN TO JOIN 💉</p>
-          <p class="text-[8px] text-slate-400 font-mono break-all max-w-[95px]">${host}</p>
-        </div>
-      </div>
-    </div>
+<div class="w-full overflow-hidden rounded-t-lg mb-2.5 bg-slate-950/80 h-1 relative">
+<div class="ecg-line w-full"></div>
+</div>
 
-    <div class="grid grid-cols-2 gap-4 mb-4">
-      <!-- Emergency Team -->
-      <div class="bg-red-950/30 border border-red-500/40 p-3.5 rounded-xl relative shadow-md backdrop-blur-md">
-        <div class="flex justify-between items-center mb-2">
-          <h3 class="text-sm font-bold text-red-400 flex items-center gap-1">
-            <span>🚨</span> Emergency Team
-          </h3>
-          <span id="scoreA" class="text-xs font-bold text-red-400 bg-red-950/90 px-2.5 py-0.5 rounded border border-red-700/60 font-mono shadow-inner">
-            0 BPM
-          </span>
-        </div>
-        <div class="slot-container border border-red-500/50 mb-2">
-          <div id="reelA" class="slot-reel">
-            <div class="slot-item text-red-400 font-mono text-xs">Waiting for staff... 🚑</div>
-          </div>
-        </div>
-        <div class="text-[10px] font-semibold text-slate-300 mb-0.5 flex items-center gap-1">
-          <span>👨‍⚕️</span> Members:
-        </div>
-        <div id="playersA" class="text-[10px] text-slate-200 flex flex-wrap gap-1 min-h-[20px]"></div>
-      </div>
+<div class="flex justify-between items-center mb-4 pb-2.5 border-b border-teal-500/20 px-1">
+<div class="flex items-center gap-2.5">
+<div class="p-2 bg-teal-950/80 rounded-lg border border-teal-400/40 text-xl shadow-inner text-teal-300">
+🩺
+</div>
+<div>
+<h1 class="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-300 via-emerald-400 to-cyan-400">
+Nursing English & Grammar Challenge
+</h1>
+<p class="text-[10px] text-teal-300/70 font-mono flex items-center gap-1.5 mt-0.5">
+<span>🏥 NURSING DEPARTMENT</span> • <span>GRAMMAR: WHO / WHICH / THAT</span>
+</p>
+</div>
+</div>
 
-      <!-- ICU Team -->
-      <div class="bg-blue-950/30 border border-blue-500/40 p-3.5 rounded-xl relative shadow-md backdrop-blur-md">
-        <div class="flex justify-between items-center mb-2">
-          <h3 class="text-sm font-bold text-blue-400 flex items-center gap-1">
-            <span>🩺</span> ICU Care Team
-          </h3>
-          <span id="scoreB" class="text-xs font-bold text-blue-400 bg-blue-950/90 px-2.5 py-0.5 rounded border border-blue-700/60 font-mono shadow-inner">
-            0 BPM
-          </span>
-        </div>
-        <div class="slot-container border border-blue-500/50 mb-2">
-          <div id="reelB" class="slot-reel">
-            <div class="slot-item text-blue-400 font-mono text-xs">Waiting for staff... 💉</div>
-          </div>
-        </div>
-        <div class="text-[10px] font-semibold text-slate-300 mb-0.5 flex items-center gap-1">
-          <span>👩‍⚕️</span> Members:
-        </div>
-        <div id="playersB" class="text-[10px] text-slate-200 flex flex-wrap gap-1 min-h-[20px]"></div>
-      </div>
-    </div>
+<div class="flex items-center gap-2 bg-slate-950/90 p-1.5 rounded-lg border border-teal-500/30 shadow-md">
+<img src="https://api.qrserver.com/v1/create-qr-code/?size=65x65&data=https://${host}/" alt="QR Code" class="w-12 h-12 rounded border border-teal-400/30">
+<div class="text-left">
+<p class="text-[10px] font-bold text-emerald-400 flex items-center gap-1">📱 SCAN TO JOIN 💉</p>
+<p class="text-[8px] text-slate-400 font-mono break-all max-w-[95px]">${host}</p>
+</div>
+</div>
+</div>
 
-    <!-- Question Box / Final Winner Board -->
-    <div id="questionContainer" class="bg-slate-950/90 p-4 rounded-xl border border-amber-500/40 text-center mb-4 shadow-lg relative">
-      <div id="caseLabel" class="absolute -top-2 left-1/2 -translate-x-1/2 bg-amber-500 text-slate-950 px-2.5 py-0.2 rounded-full text-[9px] font-bold tracking-wider">
-        CLINICAL CASE QUESTION 🫀
-      </div>
-      <h2 id="projQuestion" class="text-base font-bold text-amber-300 leading-snug mt-0.5">
-        Scan the QR code to join, then click "Start Wheel"! 🎰
-      </h2>
-    </div>
+<div class="grid grid-cols-2 gap-4 mb-4">
+<!-- Emergency Team -->
+<div class="bg-red-950/30 border border-red-500/40 p-3.5 rounded-xl relative shadow-md backdrop-blur-md">
+<div class="flex justify-between items-center mb-2">
+<h3 class="text-sm font-bold text-red-400 flex items-center gap-1">
+<span>🚨</span> Emergency Team
+</h3>
+<span id="scoreA" class="text-xs font-bold text-red-400 bg-red-950/90 px-2.5 py-0.5 rounded border border-red-700/60 font-mono shadow-inner">
+0 BPM
+</span>
+</div>
+<div class="slot-container border border-red-500/50 mb-2">
+<div id="reelA" class="slot-reel">
+<div class="slot-item text-red-400 font-mono text-xs">Waiting for staff... 🚑</div>
+</div>
+</div>
+<div class="text-[10px] font-semibold text-slate-300 mb-0.5 flex items-center gap-1">
+<span>👨‍⚕️</span> Members:
+</div>
+<div id="playersA" class="text-[10px] text-slate-200 flex flex-wrap gap-1 min-h-[20px]"></div>
+</div>
 
-    <div class="flex justify-between items-center">
-      <div class="text-[10px] text-emerald-400 font-mono flex items-center gap-1.5 bg-slate-950 px-2 py-0.5 rounded border border-emerald-500/30">
-        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
-        <span id="roundCounter">SYSTEM ONLINE</span>
-      </div>
-      <button id="startBtn" onclick="startRound()" class="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 active:scale-95 text-white px-6 py-2 rounded-lg font-bold text-sm shadow-md shadow-emerald-950/50 transition flex items-center gap-1.5 border border-emerald-400/30">
-        <span>🎰</span> Start Wheel
-      </button>
-    </div>
-  </div>
+<!-- ICU Team -->
+<div class="bg-blue-950/30 border border-blue-500/40 p-3.5 rounded-xl relative shadow-md backdrop-blur-md">
+<div class="flex justify-between items-center mb-2">
+<h3 class="text-sm font-bold text-blue-400 flex items-center gap-1">
+<span>🩺</span> ICU Care Team
+</h3>
+<span id="scoreB" class="text-xs font-bold text-blue-400 bg-blue-950/90 px-2.5 py-0.5 rounded border border-blue-700/60 font-mono shadow-inner">
+0 BPM
+</span>
+</div>
+<div class="slot-container border border-blue-500/50 mb-2">
+<div id="reelB" class="slot-reel">
+<div class="slot-item text-blue-400 font-mono text-xs">Waiting for staff... 💉</div>
+</div>
+</div>
+<div class="text-[10px] font-semibold text-slate-300 mb-0.5 flex items-center gap-1">
+<span>👩‍⚕️</span> Members:
+</div>
+<div id="playersB" class="text-[10px] text-slate-200 flex flex-wrap gap-1 min-h-[20px]"></div>
+</div>
+</div>
 
-  <script>
-    const socket = io();
+<!-- Question Box / Final Winner Board -->
+<div id="questionContainer" class="bg-slate-950/90 p-4 rounded-xl border border-amber-500/40 text-center mb-4 shadow-lg relative">
+<div id="caseLabel" class="absolute -top-2 left-1/2 -translate-x-1/2 bg-amber-500 text-slate-950 px-2.5 py-0.2 rounded-full text-[9px] font-bold tracking-wider">
+CLINICAL CASE QUESTION 🫀
+</div>
+<h2 id="projQuestion" class="text-base font-bold text-amber-300 leading-snug mt-0.5">
+Scan the QR code to join, then click "Start Wheel"! 🎰
+</h2>
+</div>
 
-    socket.on('update_players', (players) => {
-      const teamA = players.filter(p => p.team === 'A');
-      const teamB = players.filter(p => p.team === 'B');
+<div class="flex justify-between items-center">
+<div class="text-[10px] text-emerald-400 font-mono flex items-center gap-1.5 bg-slate-950 px-2 py-0.5 rounded border border-emerald-500/30">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+<span id="roundCounter">SYSTEM ONLINE</span>
+</div>
+<button id="startBtn" onclick="startRound()" class="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 active:scale-95 text-white px-6 py-2 rounded-lg font-bold text-sm shadow-md shadow-emerald-950/50 transition flex items-center gap-1.5 border border-emerald-400/30">
+<span>🎰</span> Start Wheel
+</button>
+</div>
 
-      document.getElementById('playersA').innerHTML = teamA.map(p => 
-        \`<span class="bg-red-950/90 border border-red-700/70 text-red-200 px-1.5 py-0.2 rounded text-[10px] font-medium">🚑 \${p.name}</span>\`
-      ).join('');
+<div class="mt-4 pt-2 border-t border-slate-800/80 text-center">
+<p class="text-xs font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-pink-400 to-teal-300 animate-pulse tracking-widest">
+✨ created by Rimaz ✨
+</p>
+</div>
+</div>
 
-      document.getElementById('playersB').innerHTML = teamB.map(p => 
-        \`<span class="bg-blue-950/90 border border-blue-700/70 text-blue-200 px-1.5 py-0.2 rounded text-[10px] font-medium">🩺 \${p.name}</span>\`
-      ).join('');
-    });
+<script>
+const socket = io();
 
-    function startRound() {
-      socket.emit('start_round');
-    }
+socket.on('update_players', (players) => {
+const teamA = players.filter(p => p.team === 'A');
+const teamB = players.filter(p => p.team === 'B');
 
-    socket.on('round_started', (data) => {
-      document.getElementById('roundCounter').innerText = \`QUESTION \${data.questionNum} OF \${data.totalQuestions}\`;
-      document.getElementById('projQuestion').innerText = \`Case (\${data.questionNum}): \${data.question}\`;
-      runSlotMachine('reelA', data.teamAPlayers, data.activeA.name, 'text-red-400');
-      runSlotMachine('reelB', data.teamBPlayers, data.activeB.name, 'text-blue-400');
-    });
+document.getElementById('playersA').innerHTML = teamA.map(p =>
+\`<span class="bg-red-950/90 border border-red-700/70 text-red-200 px-1.5 py-0.2 rounded text-[10px] font-medium">🚑 \${p.name}</span>\`
+).join('');
 
-    function runSlotMachine(reelId, playersList, finalWinner, textColorClass) {
-      const reel = document.getElementById(reelId);
-      if (!reel) return;
-      let names = [...playersList.map(p => p.name)];
-      
-      let repeatedNames = [];
-      for (let i = 0; i < 12; i++) {
-        repeatedNames = repeatedNames.concat(names);
-      }
-      repeatedNames.push(finalWinner);
+document.getElementById('playersB').innerHTML = teamB.map(p =>
+\`<span class="bg-blue-950/90 border border-blue-700/70 text-blue-200 px-1.5 py-0.2 rounded text-[10px] font-medium">🩺 \${p.name}</span>\`
+).join('');
+});
 
-      reel.innerHTML = repeatedNames.map(name => \`<div class="slot-item \${textColorClass}">🩺 \${name}</div>\`).join('');
+function startRound() {
+socket.emit('start_round');
+}
 
-      let currentIndex = 0;
-      let speed = 35;
+socket.on('round_started', (data) => {
+document.getElementById('roundCounter').innerText = \`QUESTION \${data.questionNum} OF \${data.totalQuestions}\`;
+document.getElementById('projQuestion').innerText = \`Case (\${data.questionNum}): \${data.question}\`;
+runSlotMachine('reelA', data.teamAPlayers, data.activeA.name, 'text-red-400');
+runSlotMachine('reelB', data.teamBPlayers, data.activeB.name, 'text-blue-400');
+});
 
-      function spin() {
-        currentIndex++;
-        reel.style.transform = \`translateY(-\${currentIndex * 52}px)\`;
+function runSlotMachine(reelId, playersList, finalWinner, textColorClass) {
+const reel = document.getElementById(reelId);
+if (!reel) return;
+let names = [...playersList.map(p => p.name)];
 
-        if (currentIndex < repeatedNames.length - 1) {
-          if (currentIndex > repeatedNames.length - 6) speed += 50;
-          setTimeout(spin, speed);
-        }
-      }
-      spin();
-    }
+let repeatedNames = [];
+for (let i = 0; i < 12; i++) {
+repeatedNames = repeatedNames.concat(names);
+}
+repeatedNames.push(finalWinner);
 
-    socket.on('answer_received', (data) => {
-      document.getElementById('scoreA').innerText = data.scores.A + ' BPM 🩸';
-      document.getElementById('scoreB').innerText = data.scores.B + ' BPM 💊';
-    });
+reel.innerHTML = repeatedNames.map(name => \`<div class="slot-item \${textColorClass}">🩺 \${name}</div>\`).join('');
 
-    socket.on('game_over', (data) => {
-      const qBox = document.getElementById('projQuestion');
-      const cLabel = document.getElementById('caseLabel');
-      const btn = document.getElementById('startBtn');
+let currentIndex = 0;
+let speed = 35;
 
-      cLabel.innerText = "🏆 FINAL RESULTS 🏆";
-      cLabel.className = "absolute -top-2 left-1/2 -translate-x-1/2 bg-emerald-500 text-slate-950 px-3 py-0.2 rounded-full text-[10px] font-extrabold tracking-wider animate-pulse";
-      
-      qBox.innerHTML = \`<div class="py-2"><p class="text-xs text-slate-300 mb-1">MATCH COMPLETED!</p><p class="text-2xl font-black text-emerald-400">🎉 WINNER: \${data.winner} 🎉</p><p class="text-xs text-amber-300 mt-2 font-mono">Final Score -> Emergency: \${data.scores.A} BPM | ICU Care: \${data.scores.B} BPM</p></div>\`;
+function spin() {
+currentIndex++;
+reel.style.transform = \`translateY(-\${currentIndex * 52}px)\`;
 
-      btn.innerText = "🔄 Start New Game";
-    });
+if (currentIndex < repeatedNames.length - 1) {
+if (currentIndex > repeatedNames.length - 6) speed += 50;
+setTimeout(spin, speed);
+}
+}
+spin();
+}
 
-    socket.on('error_message', (msg) => alert(msg));
-  </script>
+socket.on('answer_received', (data) => {
+document.getElementById('scoreA').innerText = data.scores.A + ' BPM 🩸';
+document.getElementById('scoreB').innerText = data.scores.B + ' BPM 💊';
+});
+
+socket.on('game_over', (data) => {
+const qBox = document.getElementById('projQuestion');
+const cLabel = document.getElementById('caseLabel');
+const btn = document.getElementById('startBtn');
+
+cLabel.innerText = "🏆 FINAL RESULTS 🏆";
+cLabel.className = "absolute -top-2 left-1/2 -translate-x-1/2 bg-emerald-500 text-slate-950 px-3 py-0.2 rounded-full text-[10px] font-extrabold tracking-wider animate-pulse";
+
+qBox.innerHTML = \`<div class="py-2"><p class="text-xs text-slate-300 mb-1">MATCH COMPLETED!</p><p class="text-2xl font-black text-emerald-400">🎉 WINNER: \${data.winner} 🎉</p><p class="text-xs text-amber-300 mt-2 font-mono">Final Score -> Emergency: \${data.scores.A} BPM | ICU Care: \${data.scores.B} BPM</p></div>\`;
+
+btn.innerText = "🔄 Start New Game";
+});
+
+socket.on('error_message', (msg) => alert(msg));
+</script>
 </body>
 </html>
-  `;
+`;
 }
+
